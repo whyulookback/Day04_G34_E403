@@ -72,8 +72,8 @@ Fill from `artifacts/version_log.csv` and `runs/*.json`.
 |---|---|---|---|---:|---:|---|
 | v0 | baseline | Baseline run to establish initial performance benchmark | case_accuracy | 0.0 | 0.65 | runs/v0_B_base_openrouter_20260729T101023034591.json |
 | v1 | system_prompt.md | Instruct prompt on clarify rules, confirm before send, and out-of-scope handling | tool_routing_accuracy | 0.70 | 0.90 | runs/v1_B_base_openrouter_20260729T102352970001.json |
-| v2 | tools.yaml | Require response_type in clarify schema and instruct explicit parameter conventions | case_accuracy | 0.65 | 0.95 | runs/v2_B_base_openrouter_20260729T102912146152.json |
-| v3 | system_prompt.md | Explicitly instruct response_type=yes_no when user requests to send or post | case_accuracy | 0.95 | 1.00 | runs/v3_B_base_openrouter_20260729T103734905150.json |
+| v2 | tools.yaml| Require response_type in clarify schema and instruct explicit parameter conventions | case_accuracy | 0.65 | 0.95 | runs/v2_B_base_openrouter_20260729T102912146152.json |
+| v3 |  |  |  |  |  |  |
 
 ## B2. Failure analysis
 
@@ -121,9 +121,9 @@ UI is core deliverable, not bonus. Do not list it here.
 
 | Category | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|
-| Must-have: tool mới đầu tiên |  |  |  |
-| Optional built-in |  |  |  |
-| Bonus: tool mới thứ 4 trở đi |  |  |  |
+| Must-have: tool mới 1 | `tools/weather_forecast/TOOL.md` | Geocoding & dự báo thời tiết real-time qua Open-Meteo API | Xử lý địa điểm không tồn tại |
+| Must-have: tool mới 2 | `tools/currency_convert/TOOL.md` | Quy đổi tỷ giá ngoại tệ real-time qua ExchangeRate Open API | Kiểm tra mã đồng tiền hợp lệ |
+| Bonus: tool mới 3 | `tools/crypto_price/TOOL.md` | Tra cứu giá tiền mã hóa real-time qua CoinGecko API | Xử lý coin ID không tồn tại |
 
 ## B6. Reflection
 

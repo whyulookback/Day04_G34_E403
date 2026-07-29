@@ -18,6 +18,11 @@ from .social_search.tool import search_tweets
 from .send.tool import send_telegram
 from .lookup.tool import web_search
 
+# Team custom new tools
+from .weather_forecast.tool import get_weather_forecast
+from .currency_convert.tool import convert_currency
+from .crypto_price.tool import get_crypto_price
+
 
 # NOTE (starter_v0): tool names here are intentionally vague. These keys are the
 # names the model sees AND the names data/eval_base.json + data/eval_research_extension.json
@@ -35,6 +40,10 @@ TOOL_FUNCTIONS = {
     "policy": search_company_policy,
     "papers": arxiv_search,
     "paper_text": get_arxiv_paper_text,
+    # Team custom new tools
+    "weather_forecast": get_weather_forecast,
+    "currency_convert": convert_currency,
+    "crypto_price": get_crypto_price,
 }
 
 
