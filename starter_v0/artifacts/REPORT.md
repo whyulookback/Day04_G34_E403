@@ -6,9 +6,15 @@
 
 ## Team
 
-- Team:
+- Team:G34
 - Members:
-- Provider/model:
+    - Dương Minh Quân - 2A202601903
+    - Ngô Việt Anh - 2A202601579
+    - Phí Đình Hoàng Anh - 2A202601853
+    - Lê Thị Thuý - 2A202601381
+    - Ngô Đình Khánh - 2A202601625
+    - Trần Thị Kiều Oanh - 2A202601413
+- Provider/model: openrouter/openai/gpt-4o-mini
 
 ---
 
