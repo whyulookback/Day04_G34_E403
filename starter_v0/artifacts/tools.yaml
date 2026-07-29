@@ -9,17 +9,17 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Hỏi người dùng khi thiếu thông tin bắt buộc hoặc cần xác nhận hành động. Với send/post/publish, luôn dùng response_type=yes_no; tham chiếu như 'bản tin này' là đủ cho bước xác nhận và không được đổi thành câu hỏi text để xin lại nội dung."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
-      required: [question]
+        question: {type: string, default: "", description: "Câu hỏi gửi cho người dùng"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời — LUÔN đặt giá trị phù hợp"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn (chỉ dùng khi response_type='choice')"}
+      required: [question, response_type]
 
   - name: timeline
-    description: "Lấy các bài đăng gần đây."
+    description: "Lấy bài đăng gần đây của đúng một tài khoản đã được nêu rõ bằng handle hoặc tên account trong conversation. Không có tài khoản mặc định và không được tự chọn sama hay người nổi tiếng; nếu conversation không chứa account identity thì phải dùng clarify."
     parameters:
       type: object
       properties:
@@ -76,6 +76,16 @@ tools:
         template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Khuôn"}
         headline: {type: string, default: "", description: "Tiêu đề"}
       required: [items, template]
+
+  - name: keywords
+    description: "Trích từ khóa từ chính văn bản người dùng đã cung cấp. Chỉ dùng khi người dùng yêu cầu lấy từ khóa, tag hoặc chủ đề từ một đoạn text có sẵn; không dùng để tìm web, đọc URL hay thay cho lookup."
+    parameters:
+      type: object
+      properties:
+        text: {type: string, default: "", description: "Văn bản nguồn phải được người dùng cung cấp nguyên văn"}
+        max_keywords: {type: integer, default: 8, minimum: 1, maximum: 20, description: "Số từ khóa tối đa"}
+        min_length: {type: integer, default: 3, minimum: 2, maximum: 12, description: "Độ dài tối thiểu của từ"}
+      required: [text]
 
   # ---------------- Bonus tools ----------------
   - name: send

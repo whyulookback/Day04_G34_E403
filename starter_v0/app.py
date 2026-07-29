@@ -1,183 +1,296 @@
 from __future__ import annotations
 
-import sys
 import json
+from datetime import datetime
 from pathlib import Path
+from typing import Any
+
 import streamlit as st
 
-if sys.stdout and hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-
+from chat import (
+    ARTIFACTS_DIR,
+    ROOT,
+    now_iso,
+    run_model_tool_loop,
+    safe_slug,
+    trim_history,
+    write_transcript,
+)
 from env_loader import load_lab_env
 from providers import make_provider
-from tools import load_tool_declarations, to_openai_tools, TOOL_FUNCTIONS
-from chat import run_model_tool_loop
+from tools import load_tool_declarations, to_openai_tools
+from versioning import artifact_version_dict, build_artifact_version
 
-ROOT = Path(__file__).parent
+
+TRANSCRIPTS_DIR = ROOT / "transcripts"
+RUNS_DIR = ROOT / "runs"
+DEFAULT_VERSION = "v9"
+
+
+def new_transcript(
+    *,
+    version: str,
+    provider_name: str,
+    model: str | None,
+    history_window: int,
+    max_tool_rounds: int,
+) -> tuple[dict[str, Any], Path]:
+    artifact = build_artifact_version(
+        version,
+        ARTIFACTS_DIR / "system_prompt.md",
+        ARTIFACTS_DIR / "tools.yaml",
+    )
+    timestamp = datetime.now().strftime("%Y%m%dT%H%M%S%f")
+    transcript_id = "_".join(
+        [safe_slug(version), safe_slug(provider_name), timestamp]
+    )
+    path = TRANSCRIPTS_DIR / f"{transcript_id}.transcript.json"
+    transcript: dict[str, Any] = {
+        "transcript_id": transcript_id,
+        **artifact_version_dict(artifact),
+        "provider": provider_name,
+        "model": model,
+        "system_prompt": str(ARTIFACTS_DIR / "system_prompt.md"),
+        "tools": str(ARTIFACTS_DIR / "tools.yaml"),
+        "history_window": history_window,
+        "max_tool_rounds": max_tool_rounds,
+        "created_at": now_iso(),
+        "updated_at": now_iso(),
+        "turns": [],
+    }
+    write_transcript(path, transcript)
+    return transcript, path
+
+
+def run_metrics() -> list[dict[str, Any]]:
+    latest: dict[str, tuple[float, dict[str, Any]]] = {}
+    for path in RUNS_DIR.glob("*_B_base_*.json"):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            version = str(payload.get("version", ""))
+            generated = path.stat().st_mtime
+            if version and (version not in latest or generated > latest[version][0]):
+                latest[version] = (generated, payload)
+        except (OSError, ValueError):
+            continue
+    rows = []
+    for version in sorted(latest, key=lambda value: int(value[1:]) if value[1:].isdigit() else 999):
+        payload = latest[version][1]
+        summary = payload.get("summary", {})
+        rows.append(
+            {
+                "version": version,
+                "case_accuracy": summary.get("case_accuracy"),
+                "routing": summary.get("tool_routing_accuracy"),
+                "arguments": summary.get("argument_accuracy"),
+                "multiturn": summary.get("multiturn_accuracy"),
+                "provider_errors": summary.get("provider_error_cases"),
+                "artifact": payload.get("artifact_version"),
+            }
+        )
+    return rows
+
+
+def render_trace(turn: dict[str, Any]) -> None:
+    label = f"Turn {turn['turn_index']} · {turn.get('status', 'unknown')}"
+    with st.expander(label, expanded=turn["turn_index"] == len(st.session_state.transcript["turns"])):
+        for round_record in turn.get("rounds", []):
+            st.markdown(f"**Round {round_record.get('round')}**")
+            if round_record.get("assistant_text"):
+                st.caption(round_record["assistant_text"])
+            calls = round_record.get("tool_calls") or []
+            results = round_record.get("tool_results") or []
+            if not calls:
+                st.write("No tool call.")
+            for index, call in enumerate(calls):
+                result = results[index] if index < len(results) else None
+                st.code(
+                    json.dumps(
+                        {
+                            "tool": call.get("name"),
+                            "args": call.get("args", {}),
+                            "result": result,
+                        },
+                        ensure_ascii=False,
+                        indent=2,
+                        default=str,
+                    ),
+                    language="json",
+                )
+        if turn.get("error"):
+            st.error(turn["error"])
+
+
+st.set_page_config(
+    page_title="G34 Research Agent",
+    page_icon="🔎",
+    layout="wide",
+)
 load_lab_env(ROOT)
 
-# Page configuration
-st.set_page_config(
-    page_title="AI Research Agent — Day 04 Lab",
-    page_icon="🔬",
-    layout="wide",
-    initial_sidebar_state="expanded",
+st.title("🔎 G34 Research Agent")
+st.caption("Live research, full tool trace, artifact identity, and transcript evidence.")
+
+with st.sidebar:
+    st.header("Runtime")
+    provider_name = st.selectbox(
+        "Provider",
+        ("openrouter", "openai", "anthropic", "gemini"),
+        index=0,
+    )
+    version = st.text_input("Artifact version", value=DEFAULT_VERSION).strip() or DEFAULT_VERSION
+    model_override = st.text_input("Model override (optional)").strip() or None
+    history_window = st.slider("History window", 1, 10, 5)
+    max_tool_rounds = st.slider("Max tool rounds", 1, 6, 4)
+    config_signature = (
+        provider_name,
+        version,
+        model_override,
+        history_window,
+        max_tool_rounds,
+    )
+
+    if st.button("New transcript", width="stretch"):
+        for key in ("transcript", "transcript_path", "history", "config_signature"):
+            st.session_state.pop(key, None)
+        st.rerun()
+
+system_prompt = (ARTIFACTS_DIR / "system_prompt.md").read_text(encoding="utf-8")
+declarations = load_tool_declarations(ARTIFACTS_DIR / "tools.yaml")
+openai_tools = to_openai_tools(declarations)
+artifact = build_artifact_version(
+    version,
+    ARTIFACTS_DIR / "system_prompt.md",
+    ARTIFACTS_DIR / "tools.yaml",
 )
 
-# Custom CSS styling
-st.markdown("""
-<style>
-    .main-header { font-size: 2.2rem; font-weight: 700; color: #1E88E5; margin-bottom: 0.5rem; }
-    .sub-header { font-size: 1.1rem; color: #555; margin-bottom: 1.5rem; }
-    .stChatMessage { border-radius: 8px; }
-</style>
-""", unsafe_allow_html=True)
+if (
+    "transcript" not in st.session_state
+    or st.session_state.get("config_signature") != config_signature
+):
+    provider_for_metadata = make_provider(provider_name)
+    selected_model = model_override or getattr(provider_for_metadata, "default_model", None)
+    transcript, transcript_path = new_transcript(
+        version=version,
+        provider_name=provider_name,
+        model=selected_model,
+        history_window=history_window,
+        max_tool_rounds=max_tool_rounds,
+    )
+    st.session_state.transcript = transcript
+    st.session_state.transcript_path = transcript_path
+    st.session_state.history = []
+    st.session_state.config_signature = config_signature
 
-# Title & Description
-st.markdown("<div class='main-header'>🔬 AI Research Agent UI</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-header'>Interactive Demonstration & Multi-Version Tool Trace Dashboard</div>", unsafe_allow_html=True)
+with st.sidebar:
+    st.header("Artifact")
+    st.code(artifact.artifact_version)
+    st.caption(f"{len(declarations)} declared tools")
+    st.caption(f"Transcript: {st.session_state.transcript_path.name}")
+    transcript_json = json.dumps(
+        st.session_state.transcript,
+        ensure_ascii=False,
+        indent=2,
+        default=str,
+    )
+    st.download_button(
+        "Download transcript",
+        data=transcript_json,
+        file_name=st.session_state.transcript_path.name,
+        mime="application/json",
+        width="stretch",
+    )
 
-# Sidebar — Configuration
-st.sidebar.title("⚙️ System Configuration")
-provider_name = st.sidebar.selectbox("Provider", ["openrouter", "openai", "gemini", "anthropic"], index=0)
+tab_chat, tab_trace, tab_evidence, tab_tools = st.tabs(
+    ["Chat", "Tool trace", "Version evidence", "Tools"]
+)
 
-version_choice = st.sidebar.selectbox("Artifact Version", ["v3 (Latest: 95% Acc)", "v2 (90% Acc)", "v1 (65% Acc)", "v0 (75% Baseline)"], index=0)
-ver_code = version_choice.split()[0]
+with tab_chat:
+    for turn in st.session_state.transcript["turns"]:
+        with st.chat_message("user"):
+            st.write(turn["user"])
+        with st.chat_message("assistant"):
+            if turn.get("error"):
+                st.error(turn["error"])
+            else:
+                st.write(turn.get("assistant_text") or "")
 
-# Version metrics metadata map
-VER_METRICS = {
-    "v0": {"accuracy": "75%", "routing": "80%", "multiturn": "100%", "hash": "eb1c8179815b"},
-    "v1": {"accuracy": "65%", "routing": "80%", "multiturn": "83%", "hash": "b349f381a54f"},
-    "v2": {"accuracy": "90%", "routing": "95%", "multiturn": "83%", "hash": "214ce7ce30fb"},
-    "v3": {"accuracy": "95%", "routing": "95%", "multiturn": "100%", "hash": "4a006df55ad6"},
-}
+    user_text = st.chat_input("Ask for web news, tweets, URL reading, or keyword extraction…")
+    if user_text:
+        turn_index = len(st.session_state.transcript["turns"]) + 1
+        with st.chat_message("user"):
+            st.write(user_text)
+        turn_record: dict[str, Any] = {
+            "turn_index": turn_index,
+            "started_at": now_iso(),
+            "user": user_text,
+            "status": "started",
+            "assistant_text": None,
+            "rounds": [],
+            "tool_events": [],
+        }
+        messages = [
+            {"role": "system", "content": system_prompt},
+            *trim_history(st.session_state.history, history_window),
+            {"role": "user", "content": user_text},
+        ]
+        with st.chat_message("assistant"):
+            with st.spinner("Running agent and tools…"):
+                try:
+                    provider = make_provider(provider_name)
+                    result = run_model_tool_loop(
+                        provider=provider,
+                        messages=messages,
+                        tools=openai_tools,
+                        model=model_override,
+                        max_tool_rounds=max_tool_rounds,
+                    )
+                    turn_record.update(result)
+                    assistant_text = result["assistant_text"]
+                    st.write(assistant_text)
+                    st.session_state.history.extend(
+                        [
+                            {"role": "user", "content": user_text},
+                            {"role": "assistant", "content": assistant_text},
+                        ]
+                    )
+                except Exception as exc:
+                    turn_record.update(
+                        {
+                            "status": "provider_error",
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                    )
+                    st.error(turn_record["error"])
+        turn_record["ended_at"] = now_iso()
+        st.session_state.transcript["turns"].append(turn_record)
+        write_transcript(
+            st.session_state.transcript_path,
+            st.session_state.transcript,
+        )
 
-m_info = VER_METRICS[ver_code]
-st.sidebar.markdown("---")
-st.sidebar.subheader("📊 Version Benchmark")
-col_s1, col_s2 = st.sidebar.columns(2)
-col_s1.metric("Case Accuracy", m_info["accuracy"])
-col_s2.metric("Routing Acc", m_info["routing"])
-st.sidebar.caption(f"Prompt Hash: `{m_info['hash']}`")
+with tab_trace:
+    if not st.session_state.transcript["turns"]:
+        st.info("Run a chat turn to see round-by-round tool evidence.")
+    for turn in st.session_state.transcript["turns"]:
+        render_trace(turn)
 
-# System Prompt & Tools loader
-@st.cache_resource
-def get_agent_resources():
-    sys_prompt = (ROOT / "artifacts" / "system_prompt.md").read_text(encoding="utf-8")
-    tools_decl = to_openai_tools(load_tool_declarations(ROOT / "artifacts" / "tools.yaml"))
-    return sys_prompt, tools_decl
+with tab_evidence:
+    rows = run_metrics()
+    if rows:
+        st.dataframe(rows, width="stretch", hide_index=True)
+    else:
+        st.info("No base run JSON files found.")
 
-sys_prompt, tools_decl = get_agent_resources()
-
-# Session State
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "tool_traces" not in st.session_state:
-    st.session_state.tool_traces = []
-
-# Scenario presets
-st.subheader("💡 Demo Scenarios")
-sc_cols = st.columns(3)
-preset_clicked = None
-if sc_cols[0].button("1️⃣ HackerNews Research"):
-    preset_clicked = "Tìm kiếm các bài thảo luận hot nhất về LLM trên HackerNews"
-if sc_cols[1].button("2️⃣ Missing Info -> Clarify"):
-    preset_clicked = "Cho tôi xem 5 bài đăng mới nhất"
-if sc_cols[2].button("3️⃣ Sensitive Telegram Action"):
-    preset_clicked = "Gửi tin nhắn 'Báo cáo Lab Day 04 đã hoàn tất' qua Telegram giúp mình"
-
-# Display Chat History
-st.subheader("💬 Interactive Agent Conversation")
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
-
-# User Input Box
-user_input = st.chat_input("Nhập câu hỏi hoặc yêu cầu cho Research Agent...")
-if preset_clicked:
-    user_input = preset_clicked
-
-if user_input:
-    # Append user message
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    with st.chat_message("user"):
-        st.write(user_input)
-
-    # Call Model Provider & Execute Tools using run_model_tool_loop from chat.py
-    with st.chat_message("assistant"):
-        with st.spinner("Agent running tool loop & synthesizing response..."):
-            try:
-                provider = make_provider(provider_name)
-                formatted_messages = [{"role": "system", "content": sys_prompt}] + [
-                    {"role": m["role"], "content": m["content"]} for m in st.session_state.messages
-                ]
-
-                # Reuse run_model_tool_loop from chat.py
-                result_dict = run_model_tool_loop(
-                    provider=provider,
-                    messages=formatted_messages,
-                    tools=tools_decl,
-                    model=None,
-                    max_tool_rounds=3,
-                )
-
-                final_text = result_dict.get("assistant_text", "")
-                events = result_dict.get("tool_events", [])
-
-                # If clarify tool was called, extract question text if assistant_text is empty
-                if not final_text and events:
-                    for ev in events:
-                        if ev.get("tool") == "clarify":
-                            final_text = ev.get("args", {}).get("question") or "Vui lòng cung cấp thêm thông tin chi tiết."
-                            break
-                        elif "result" in ev and "items" in ev["result"]:
-                            items = ev["result"].get("items") or []
-                            if items:
-                                items_summary = "\n".join([f"- **{it.get('title')}**: {it.get('summary', '')[:100]} ({it.get('url', '')})" for it in items[:5]])
-                                final_text = f"### Kết quả tìm kiếm ({ev['tool']}):\n{items_summary}"
-                            else:
-                                final_text = f"Đã thực thi `{ev['tool']}` thành công nhưng không tìm thấy dữ liệu phù hợp."
-
-                if not final_text:
-                    final_text = "Đã hoàn thành xử lý yêu cầu."
-
-                st.write(final_text)
-                st.session_state.messages.append({"role": "assistant", "content": final_text})
-
-                # Save tool events to traces
-                for ev in events:
-                    st.session_state.tool_traces.append({
-                        "tool": ev.get("tool"),
-                        "args": ev.get("args"),
-                        "status": "SUCCESS" if not ev.get("result", {}).get("error") else "ERROR",
-                        "result": ev.get("result"),
-                    })
-
-            except Exception as e:
-                st.error(f"Execution Error: {e}")
-
-# Tool Traces & Transparency Panel
-st.markdown("---")
-st.subheader("🔍 Real-time Tool Call Trace & Transparency Logs")
-if st.session_state.tool_traces:
-    for idx, trace in enumerate(reversed(st.session_state.tool_traces)):
-        with st.expander(f"Event #{len(st.session_state.tool_traces) - idx}: Tool `{trace['tool']}` [{trace['status']}]"):
-            c1, c2 = st.columns(2)
-            with c1:
-                st.markdown("**Arguments:**")
-                st.json(trace["args"])
-            with c2:
-                st.markdown("**Execution Output:**")
-                st.json(trace["result"])
-else:
-    st.info("Chưa có tool nào được gọi trong phiên hội thoại này.")
-
-# Footer & Control buttons
-st.sidebar.markdown("---")
-if st.sidebar.button("🧹 Clear Chat History"):
-    st.session_state.messages = []
-    st.session_state.tool_traces = []
-    st.rerun()
+with tab_tools:
+    st.dataframe(
+        [
+            {
+                "name": declaration["name"],
+                "description": declaration.get("description", ""),
+            }
+            for declaration in declarations
+        ],
+        width="stretch",
+        hide_index=True,
+    )

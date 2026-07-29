@@ -1,114 +1,256 @@
 {
   "dataset_id": "day04_v2_research_group",
   "dataset_role": "group",
-  "description": "Team eval suite cho Agent v3 (10 cases: 5 single-turn và 5 multi-turn) bao gồm test cho tool mới hn_search, routing, boundary confirmation và multi-turn.",
+  "description": "10 case do G34 tự thiết kế: 5 single-turn và 5 multi-turn, bao phủ tool mới keywords, routing nguồn, carryover, missing information, confirmation và no-tool.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
   "cases": [
     {
-      "id": "G01_hn_search_routing",
+      "id": "G34_S01_extract_keywords",
       "phase": "B",
-      "suite": "group",
-      "query": "Cộng đồng HackerNews đang thảo luận gì về LLM?",
+      "query": "Trích tối đa 4 từ khóa từ đúng đoạn văn sau: Robot học trong kho thông minh giúp robot tối ưu vận chuyển và giảm thời gian chờ.",
       "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "hn_search", "args": {"query": "LLM"}}]},
-      "metadata": {"skill": "routing_hn_search", "difficulty": "easy", "what_it_tests": "Tìm bài thảo luận trên HackerNews -> gọi hn_search với query='LLM'."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "keywords",
+            "args": {
+              "text": "Robot học trong kho thông minh giúp robot tối ưu vận chuyển và giảm thời gian chờ.",
+              "max_keywords": 4
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Tool mới của nhóm: chỉ trích keywords từ text có sẵn, không gọi web."
+      }
     },
     {
-      "id": "G02_hn_search_limit_arg",
+      "id": "G34_S02_timeline_handle_limit",
       "phase": "B",
-      "suite": "group",
-      "query": "Tìm 3 thảo luận hot nhất về Rust trên HackerNews",
+      "query": "Lấy 3 tweet mới nhất của @sama.",
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "hn_search", "args": {"query": "Rust", "limit": 3}}]},
-      "metadata": {"skill": "arg_limit_hn", "difficulty": "easy", "what_it_tests": "Trích đúng limit=3 từ '3 thảo luận'."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Phân biệt timeline theo tài khoản với social search theo chủ đề."
+      }
     },
     {
-      "id": "G03_missing_hn_query",
+      "id": "G34_S03_web_news_week",
       "phase": "B",
-      "suite": "group",
-      "query": "Tìm kiếm bài đăng mới nhất trên HackerNews",
+      "query": "Tìm trên web tin robotics trong tuần này.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Map nguồn web, intent news và timeframe tuần."
+      }
+    },
+    {
+      "id": "G34_S04_missing_url",
+      "phase": "B",
+      "query": "Đọc và tóm tắt bài viết này giúp mình.",
       "failure_type": "missing_info",
-      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
-      "metadata": {"skill": "missing_hn_query", "difficulty": "medium", "what_it_tests": "Thiếu từ khóa cần tìm trên HackerNews -> gọi clarify hỏi lại."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Không bịa URL khi fetch thiếu địa chỉ."
+      }
     },
     {
-      "id": "G04_out_of_scope_email",
+      "id": "G34_S05_capability_no_tool",
       "phase": "B",
-      "suite": "group",
-      "query": "Viết giúp tôi script Python đếm từ trong file text",
-      "failure_type": "out_of_scope",
-      "expect": {"no_tool": true},
-      "metadata": {"skill": "out_of_scope_scripting", "difficulty": "easy", "what_it_tests": "Yêu cầu viết code script -> out of scope, không gọi tool nào."}
+      "query": "Hãy cho biết ngắn gọn bạn có thể hỗ trợ những loại nghiên cứu nào.",
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "what_it_tests": "Câu hỏi về capability phải trả lời trực tiếp, không gọi tool."
+      }
     },
     {
-      "id": "G05_confirm_before_send_telegram",
+      "id": "G34_M01_switch_social_to_web",
       "phase": "B",
-      "suite": "group",
-      "query": "Gửi thông báo 'Đã xong báo cáo' qua Telegram giúp tôi",
-      "failure_type": "wrong_boundary",
-      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
-      "metadata": {"skill": "confirm_before_send", "difficulty": "medium", "what_it_tests": "Hành động send có side effect -> gọi clarify để xin xác nhận trước khi thực hiện."}
-    },
-    {
-      "id": "G06_multiturn_hn_search_fill",
-      "phase": "B",
-      "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tìm bài viết trên HackerNews giúp mình"},
-        {"role": "user", "content": "Tìm về DeepSeek nhé"},
-        {"role": "user", "content": "Lấy 5 bài mới nhất thôi"}
-      ],
-      "failure_type": "missing_info",
-      "expect": {"tool_calls": [{"name": "hn_search", "args": {"query": "DeepSeek", "limit": 5}}]},
-      "metadata": {"skill": "multiturn_hn_fill", "difficulty": "hard", "what_it_tests": "3 lượt: lượt 1 thiếu query -> lượt 2 bổ sung DeepSeek -> lượt 3 gọi hn_search với limit=5."}
-    },
-    {
-      "id": "G07_multiturn_switch_to_hn",
-      "phase": "B",
-      "suite": "group",
-      "turns": [
-        {"role": "user", "content": "Tìm tin tức web về Python"},
-        {"role": "user", "content": "À thôi, chuyển sang tìm thảo luận Python trên HackerNews"}
+        {
+          "role": "user",
+          "content": "Tìm mọi người đang nói gì về OpenAI trên Twitter."
+        },
+        {
+          "role": "user",
+          "content": "Không lấy Twitter nữa, chuyển sang tin trên web hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Giữ nguyên chủ đề OpenAI."
+        }
       ],
       "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "hn_search", "args": {"query": "Python"}}]},
-      "metadata": {"skill": "multiturn_switch_to_hn", "difficulty": "hard", "what_it_tests": "Chuyển hướng từ web_search sang hn_search ở lượt 2."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "OpenAI",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Nguồn được sửa ở turn giữa phải được giữ đến turn cuối."
+      }
     },
     {
-      "id": "G08_multiturn_correction_query",
+      "id": "G34_M02_carry_account_change_limit",
       "phase": "B",
-      "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tìm bài viết trên HackerNews về React"},
-        {"role": "user", "content": "Sửa lại thành Vue.js giúp mình"}
+        {
+          "role": "user",
+          "content": "Lấy tweet mới nhất của @elonmusk."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ cần 2 bài thôi."
+        },
+        {
+          "role": "user",
+          "content": "Đúng tài khoản đó, lấy 2 tweet mới nhất."
+        }
       ],
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "hn_search", "args": {"query": "Vue.js"}}]},
-      "metadata": {"skill": "multiturn_correction_query", "difficulty": "medium", "what_it_tests": "Sửa từ khóa từ React thành Vue.js ở lượt 2."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Carry account identity và áp dụng limit được sửa ở turn sau."
+      }
     },
     {
-      "id": "G09_multiturn_clarify_url_then_fetch",
+      "id": "G34_M03_confirm_before_send",
       "phase": "B",
-      "suite": "group",
       "turns": [
-        {"role": "user", "content": "Đọc bài báo này giúp tôi"},
-        {"role": "user", "content": "https://news.ycombinator.com/item?id=12345"}
-      ],
-      "failure_type": "missing_info",
-      "expect": {"tool_calls": [{"name": "fetch", "args": {"url": "https://news.ycombinator.com/item?id=12345"}}]},
-      "metadata": {"skill": "multiturn_clarify_url", "difficulty": "medium", "what_it_tests": "Lượt 1 thiếu URL -> lượt 2 cung cấp URL -> gọi fetch."}
-    },
-    {
-      "id": "G10_multiturn_confirm_send",
-      "phase": "B",
-      "suite": "group",
-      "turns": [
-        {"role": "user", "content": "Gửi tin nhắn 'Báo cáo AI hoàn tất' qua Telegram"},
-        {"role": "user", "content": "Tôi xác nhận đồng ý gửi nhé"}
+        {
+          "role": "user",
+          "content": "Nội dung bản tin là: AI agents cần được đánh giá bằng log thật."
+        },
+        {
+          "role": "user",
+          "content": "Chuẩn bị đăng bản tin đó lên Telegram."
+        },
+        {
+          "role": "user",
+          "content": "Đăng bản tin đó giúp mình."
+        }
       ],
       "failure_type": "wrong_boundary",
-      "expect": {"tool_calls": [{"name": "send", "args": {"text": "Báo cáo AI hoàn tất", "confirmed": true}}]},
-      "metadata": {"skill": "multiturn_confirm_send", "difficulty": "hard", "what_it_tests": "Lượt 1 hỏi xin xác nhận -> lượt 2 user đồng ý -> gọi send với confirmed=True."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Yêu cầu hành động ban đầu chưa phải xác nhận gửi."
+      }
+    },
+    {
+      "id": "G34_M04_missing_account_after_limit",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tóm tắt tweet mới nhất giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "Mình chưa nói tài khoản nào cả."
+        },
+        {
+          "role": "user",
+          "content": "Hãy hỏi mình tên tài khoản trước khi tìm 4 tweet mới nhất."
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Có limit nhưng vẫn thiếu account/topic thì phải hỏi lại."
+      }
+    },
+    {
+      "id": "G34_M05_cancel_to_capability",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm tin AI hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Thôi, không cần tìm nữa."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ liệt kê những tool bạn có."
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "what_it_tests": "Intent hiện tại hủy research và chỉ hỏi capability nên không gọi tool."
+      }
     }
   ]
 }
