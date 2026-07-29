@@ -1,0 +1,89 @@
+{
+  "timestamp": "2026-07-29T11:53:36.985727",
+  "version": "v0",
+  "provider": "openrouter",
+  "prompt": "đổi 100 usd sang vnd",
+  "response": "100 USD has been converted to approximately 2,625,266.96 VND. The exchange rate used for this conversion is 1 USD = 26,252.67 VND.",
+  "tool_events": [
+    {
+      "tool": "currency_convert",
+      "args": {
+        "from_currency": "USD",
+        "to_currency": "VND",
+        "amount": 100
+      },
+      "result": {
+        "error": null,
+        "message": "Successfully converted 100 USD to 2625266.9608 VND.",
+        "items": [
+          {
+            "title": "Currency Conversion: 100 USD to VND",
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 100,
+            "exchange_rate": 26252.669608,
+            "converted_amount": 2625266.9608,
+            "summary": "100 USD = 2625266.9608 VND (Rate: 1 USD = 26252.669608 VND)"
+          }
+        ],
+        "from_currency": "USD",
+        "to_currency": "VND",
+        "amount": 100,
+        "converted_amount": 2625266.9608,
+        "rate": 26252.669608
+      }
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "assistant_text": null,
+      "tool_calls": [
+        {
+          "name": "currency_convert",
+          "args": {
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 100
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "tool": "currency_convert",
+          "args": {
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 100
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully converted 100 USD to 2625266.9608 VND.",
+            "items": [
+              {
+                "title": "Currency Conversion: 100 USD to VND",
+                "from_currency": "USD",
+                "to_currency": "VND",
+                "amount": 100,
+                "exchange_rate": 26252.669608,
+                "converted_amount": 2625266.9608,
+                "summary": "100 USD = 2625266.9608 VND (Rate: 1 USD = 26252.669608 VND)"
+              }
+            ],
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 100,
+            "converted_amount": 2625266.9608,
+            "rate": 26252.669608
+          }
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "assistant_text": "100 USD has been converted to approximately 2,625,266.96 VND. The exchange rate used for this conversion is 1 USD = 26,252.67 VND.",
+      "tool_calls": [],
+      "tool_results": []
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "timestamp": "2026-07-29T11:31:41.246467",
+  "version": "v4",
+  "provider": "openrouter",
+  "prompt": "Thời tiết hà nội hôm nay",
+  "response": "Thời tiết hiện tại ở Hà Nội, Việt Nam là 29.1°C với tốc độ gió 5.2 km/h.",
+  "tool_events": [
+    {
+      "tool": "weather_forecast",
+      "args": {
+        "location": "Hanoi"
+      },
+      "result": {
+        "error": null,
+        "message": "Successfully retrieved weather for Hanoi, Vietnam.",
+        "items": [
+          {
+            "title": "Weather forecast for Hanoi, Vietnam",
+            "location": "Hanoi, Vietnam",
+            "latitude": 21.0245,
+            "longitude": 105.84117,
+            "temperature_celsius": 29.1,
+            "windspeed_kmh": 5.2,
+            "weather_code": 51,
+            "summary": "Current temperature in Hanoi, Vietnam is 29.1°C with wind speed of 5.2 km/h."
+          }
+        ],
+        "location": "Hanoi, Vietnam",
+        "temperature": 29.1
+      }
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "assistant_text": null,
+      "tool_calls": [
+        {
+          "name": "weather_forecast",
+          "args": {
+            "location": "Hanoi"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "tool": "weather_forecast",
+          "args": {
+            "location": "Hanoi"
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully retrieved weather for Hanoi, Vietnam.",
+            "items": [
+              {
+                "title": "Weather forecast for Hanoi, Vietnam",
+                "location": "Hanoi, Vietnam",
+                "latitude": 21.0245,
+                "longitude": 105.84117,
+                "temperature_celsius": 29.1,
+                "windspeed_kmh": 5.2,
+                "weather_code": 51,
+                "summary": "Current temperature in Hanoi, Vietnam is 29.1°C with wind speed of 5.2 km/h."
+              }
+            ],
+            "location": "Hanoi, Vietnam",
+            "temperature": 29.1
+          }
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "assistant_text": "Thời tiết hiện tại ở Hà Nội, Việt Nam là 29.1°C với tốc độ gió 5.2 km/h.",
+      "tool_calls": [],
+      "tool_results": []
+    }
+  ]
+}

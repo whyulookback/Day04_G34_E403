@@ -1,0 +1,733 @@
+{
+  "run_id": "v4_B_group_openrouter_20260729T112236468949",
+  "version": "v4",
+  "artifact_version": "v4+p81fbaa7d3f81+t61e197d7fd4f",
+  "prompt_hash": "81fbaa7d3f81c5661310d1d44c972ccdd60d64d8a45b42c17bbf3574091d9e8a",
+  "tools_hash": "61e197d7fd4feb90743a5d3fededcb322ea4be9c6201918e00976db69ff69b1f",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "D:\\DocVInAI\\Day04_G34_E403\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\DocVInAI\\Day04_G34_E403\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "starter_v0\\data\\eval_group.json",
+  "dataset_id": "day04_v2_group_team_g34",
+  "dataset_role": "group",
+  "description": "Bộ 10 eval cases do nhóm G34 tự thiết kế: 5 single-turn + 5 multi-turn đánh giá khả năng routing, xử lý ranh giới, và các tool mới (weather_forecast, currency_convert, crypto_price).",
+  "generated_at": "2026-07-29T11:22:36",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 10,
+    "case_accuracy": 1.0,
+    "tool_routing_accuracy": 1.0,
+    "argument_accuracy": 1.0,
+    "multiturn_accuracy": 1.0,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "G01_weather_forecast",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool weather_forecast với địa điểm Hanoi."
+      },
+      "input": "Thời tiết ở Hà Nội hôm nay thế nào?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "weather_forecast",
+            "args": {
+              "location": "Hanoi"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "weather_forecast",
+            "args": {
+              "location": "Hanoi"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "weather_forecast",
+          "args": {
+            "location": "Hanoi"
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully retrieved weather for Hanoi, Vietnam.",
+            "items": [
+              {
+                "title": "Weather forecast for Hanoi, Vietnam",
+                "location": "Hanoi, Vietnam",
+                "latitude": 21.0245,
+                "longitude": 105.84117,
+                "temperature_celsius": 29.2,
+                "windspeed_kmh": 5.4,
+                "weather_code": 51,
+                "summary": "Current temperature in Hanoi, Vietnam is 29.2°C with wind speed of 5.4 km/h."
+              }
+            ],
+            "location": "Hanoi, Vietnam",
+            "temperature": 29.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_currency_convert",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool currency_convert với đúng tham số USD, VND, 100."
+      },
+      "input": "Đổi giúp mình 100 USD sang VND.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "currency_convert",
+            "args": {
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 100
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "currency_convert",
+            "args": {
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 100
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "currency_convert",
+          "args": {
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 100
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully converted 100 USD to 2625266.9608 VND.",
+            "items": [
+              {
+                "title": "Currency Conversion: 100 USD to VND",
+                "from_currency": "USD",
+                "to_currency": "VND",
+                "amount": 100,
+                "exchange_rate": 26252.669608,
+                "converted_amount": 2625266.9608,
+                "summary": "100 USD = 2625266.9608 VND (Rate: 1 USD = 26252.669608 VND)"
+              }
+            ],
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 100,
+            "converted_amount": 2625266.9608,
+            "rate": 26252.669608
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_crypto_price",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool crypto_price cho symbol bitcoin."
+      },
+      "input": "Cho mình xem giá Bitcoin hiện tại theo USD.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "crypto_price",
+            "args": {
+              "symbol": "bitcoin",
+              "currency": "usd"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "crypto_price",
+            "args": {
+              "symbol": "bitcoin",
+              "currency": "usd"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "crypto_price",
+          "args": {
+            "symbol": "bitcoin",
+            "currency": "usd"
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully retrieved price for bitcoin.",
+            "items": [
+              {
+                "title": "Crypto Price: BITCOIN / USD",
+                "symbol": "bitcoin",
+                "currency": "usd",
+                "price": 63611,
+                "summary": "Current price of Bitcoin is 63611 USD."
+              }
+            ],
+            "symbol": "bitcoin",
+            "currency": "usd",
+            "price": 63611
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_missing_url_clarify",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Single-turn: Nhận biết thiếu URL bài viết và gọi clarify với response_type=text."
+      },
+      "input": "Đọc giúp mình nội dung bài viết này.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn vui lòng cung cấp URL của bài viết mà bạn muốn đọc không?",
+              "response_type": "text"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn vui lòng cung cấp URL của bài viết mà bạn muốn đọc không?",
+            "response_type": "text"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn vui lòng cung cấp URL của bài viết mà bạn muốn đọc không?",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G05_confirm_send",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Single-turn: Yêu cầu hành động nhạy cảm đăng tin -> phải xin xác nhận yes/no trước."
+      },
+      "input": "Đăng bản tin tổng hợp này lên kênh Telegram.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có chắc chắn muốn đăng bản tin tổng hợp này lên kênh Telegram không?",
+              "response_type": "yes_no"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có chắc chắn muốn đăng bản tin tổng hợp này lên kênh Telegram không?",
+            "response_type": "yes_no"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có chắc chắn muốn đăng bản tin tổng hợp này lên kênh Telegram không?",
+            "response_type": "yes_no",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G06_multi_weather_followup",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Multi-turn: Chuyển đổi ngữ cảnh sang địa điểm mới (Tokyo) khi hỏi nối tiếp thời tiết."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Thời tiết ở Hà Nội hôm nay thế nào?"
+        },
+        {
+          "role": "user",
+          "content": "Còn ở Tokyo thì sao?"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "weather_forecast",
+            "args": {
+              "location": "Tokyo"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "weather_forecast",
+            "args": {
+              "location": "Tokyo"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "weather_forecast",
+          "args": {
+            "location": "Tokyo"
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully retrieved weather for Tokyo, Japan.",
+            "items": [
+              {
+                "title": "Weather forecast for Tokyo, Japan",
+                "location": "Tokyo, Japan",
+                "latitude": 35.6895,
+                "longitude": 139.69171,
+                "temperature_celsius": 33.7,
+                "windspeed_kmh": 2.5,
+                "weather_code": 1,
+                "summary": "Current temperature in Tokyo, Japan is 33.7°C with wind speed of 2.5 km/h."
+              }
+            ],
+            "location": "Tokyo, Japan",
+            "temperature": 33.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_multi_currency_change_amount",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Multi-turn: Kế thừa mã đồng tiền USD/VND và cập nhật amount=500."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tỷ giá quy đổi 1 USD sang VND là bao nhiêu?"
+        },
+        {
+          "role": "user",
+          "content": "Nếu mình đổi 500 USD thì được bao nhiêu VND?"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "currency_convert",
+            "args": {
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 500
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "currency_convert",
+            "args": {
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 500
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "currency_convert",
+          "args": {
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 500
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully converted 500 USD to 13126334.804 VND.",
+            "items": [
+              {
+                "title": "Currency Conversion: 500 USD to VND",
+                "from_currency": "USD",
+                "to_currency": "VND",
+                "amount": 500,
+                "exchange_rate": 26252.669608,
+                "converted_amount": 13126334.804,
+                "summary": "500 USD = 13126334.804 VND (Rate: 1 USD = 26252.669608 VND)"
+              }
+            ],
+            "from_currency": "USD",
+            "to_currency": "VND",
+            "amount": 500,
+            "converted_amount": 13126334.804,
+            "rate": 26252.669608
+          }
+        }
+      ]
+    },
+    {
+      "id": "G08_multi_crypto_switch",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Multi-turn: Chuyển đổi tên đồng tiền mã hóa từ bitcoin sang ethereum."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Xem giá Bitcoin hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Còn Ethereum thì bao nhiêu?"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "crypto_price",
+            "args": {
+              "symbol": "ethereum"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "crypto_price",
+            "args": {
+              "symbol": "ethereum"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "crypto_price",
+          "args": {
+            "symbol": "ethereum"
+          },
+          "result": {
+            "error": null,
+            "message": "Successfully retrieved price for ethereum.",
+            "items": [
+              {
+                "title": "Crypto Price: ETHEREUM / USD",
+                "symbol": "ethereum",
+                "currency": "usd",
+                "price": 1886.57,
+                "summary": "Current price of Ethereum is 1886.57 USD."
+              }
+            ],
+            "symbol": "ethereum",
+            "currency": "usd",
+            "price": 1886.57
+          }
+        }
+      ]
+    },
+    {
+      "id": "G09_multi_clarify_then_search",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Multi-turn: Lượt 1 thiếu handle -> Lượt 2 bổ sung Sam Altman và map sang handle sama."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Xem các tweet mới nhất giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Của Sam Altman nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "sama"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "sama",
+            "items": [
+              {
+                "title": "wrong",
+                "summary": "wrong",
+                "url": "https://x.com/sama/status/2081832600591892712",
+                "source": "@sama",
+                "date": "Mon Jul 27 20:02:25 +0000 2026",
+                "metrics": {
+                  "favorites": 11180,
+                  "retweets": 280,
+                  "views": "2145018"
+                }
+              },
+              {
+                "title": "agreed feels big, i want a new kind of computer",
+                "summary": "agreed feels big, i want a new kind of computer",
+                "url": "https://x.com/sama/status/2081513071135346814",
+                "source": "@sama",
+                "date": "Sun Jul 26 22:52:43 +0000 2026",
+                "metrics": {
+                  "favorites": 8126,
+                  "retweets": 284,
+                  "views": "2393698"
+                }
+              },
+              {
+                "title": "chatgpt work is remarkable, and \"work\" undersells it.",
+                "summary": "chatgpt work is remarkable, and \"work\" undersells it.\n\nfrom my phone i sent:\n\n\"use all my chat history to figure out ideas for a long weekend trip with 8 friends, plan the best three options, make a full-stack site where the 9 of us can coordinate on what we would want to do in each place and decide where to go, and then after we get to group agreement make reservations. draft an email in my gmail i can send out to my friends when the site is ready.\"\n\nit...just worked.",
+                "url": "https://x.com/sama/status/2081396796174282900",
+                "source": "@sama",
+                "date": "Sun Jul 26 15:10:41 +0000 2026",
+                "metrics": {
+                  "favorites": 17408,
+                  "retweets": 573,
+                  "views": "3573157"
+                }
+              },
+              {
+                "title": "RT @gdb: stories like this should be told more",
+                "summary": "RT @gdb: stories like this should be told more",
+                "url": "https://x.com/sama/status/2081030523229728800",
+                "source": "@sama",
+                "date": "Sat Jul 25 14:55:15 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 170,
+                  "views": "44767"
+                }
+              },
+              {
+                "title": "RT @pashmerepat: A billion users can now create and publish websites from their phones with ChatGPT Work. ",
+                "summary": "RT @pashmerepat: A billion users can now create and publish websites from their phones with ChatGPT Work. \n\nBut most people don’t really gr…",
+                "url": "https://x.com/sama/status/2080713767122591863",
+                "source": "@sama",
+                "date": "Fri Jul 24 17:56:34 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 118,
+                  "views": "47743"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G10_multi_out_of_scope_reset",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Multi-turn: Lượt 2 yêu cầu viết code C++ ngoài phạm vi -> KHÔNG gọi tool."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm tin AI hôm nay"
+        },
+        {
+          "role": "user",
+          "content": "Viết giúp mình một đoạn mã C++ sắp xếp mảng."
+        }
+      ],
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Xin lỗi, nhưng tôi không thể viết mã C++ cho bạn. Tuy nhiên, tôi có thể hướng dẫn bạn về cách sắp xếp mảng trong C++. Bạn có muốn tôi giải thích cách thực hiện không?",
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    }
+  ]
+}
