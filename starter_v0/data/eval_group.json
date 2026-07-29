@@ -1,7 +1,248 @@
 {
-  "dataset_id": "day04_v2_research_group",
+  "dataset_id": "day04_v2_group_team_g34",
   "dataset_role": "group",
-  "description": "Template để NHÓM tự viết đúng 10 case: 5 single-turn dùng query và 5 multi-turn dùng turns. Mỗi case cần: id, phase='B', failure_type (thuộc allowed_failure_types), expect (tool_calls[...] hoặc no_tool=true), và metadata.what_it_tests. File để trống có chủ đích vì mỗi nhóm phải tự thiết kế các case này.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Bộ 10 eval cases do nhóm G34 tự thiết kế: 5 single-turn + 5 multi-turn đánh giá khả năng routing, xử lý ranh giới, và các tool mới (weather_forecast, currency_convert, crypto_price).",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G01_weather_forecast",
+      "phase": "B",
+      "query": "Thời tiết ở Hà Nội hôm nay thế nào?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "weather_forecast",
+            "args": {
+              "location": "Hanoi"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool weather_forecast với địa điểm Hanoi."
+      }
+    },
+    {
+      "id": "G02_currency_convert",
+      "phase": "B",
+      "query": "Đổi giúp mình 100 USD sang VND.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "currency_convert",
+            "args": {
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 100
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool currency_convert với đúng tham số USD, VND, 100."
+      }
+    },
+    {
+      "id": "G03_crypto_price",
+      "phase": "B",
+      "query": "Cho mình xem giá Bitcoin hiện tại theo USD.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "crypto_price",
+            "args": {
+              "symbol": "bitcoin",
+              "currency": "usd"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool crypto_price cho symbol bitcoin."
+      }
+    },
+    {
+      "id": "G04_missing_url_clarify",
+      "phase": "B",
+      "query": "Đọc giúp mình nội dung bài viết này.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Nhận biết thiếu URL bài viết và gọi clarify với response_type=text."
+      }
+    },
+    {
+      "id": "G05_confirm_send",
+      "phase": "B",
+      "query": "Đăng bản tin tổng hợp này lên kênh Telegram.",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Yêu cầu hành động nhạy cảm đăng tin -> phải xin xác nhận yes/no trước."
+      }
+    },
+    {
+      "id": "G06_multi_weather_followup",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Thời tiết ở Hà Nội hôm nay thế nào?"
+        },
+        {
+          "role": "user",
+          "content": "Còn ở Tokyo thì sao?"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "weather_forecast",
+            "args": {
+              "location": "Tokyo"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Chuyển đổi ngữ cảnh sang địa điểm mới (Tokyo) khi hỏi nối tiếp thời tiết."
+      }
+    },
+    {
+      "id": "G07_multi_currency_change_amount",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tỷ giá quy đổi 1 USD sang VND là bao nhiêu?"
+        },
+        {
+          "role": "user",
+          "content": "Nếu mình đổi 500 USD thì được bao nhiêu VND?"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "currency_convert",
+            "args": {
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 500
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Kế thừa mã đồng tiền USD/VND và cập nhật amount=500."
+      }
+    },
+    {
+      "id": "G08_multi_crypto_switch",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Xem giá Bitcoin hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Còn Ethereum thì bao nhiêu?"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "crypto_price",
+            "args": {
+              "symbol": "ethereum"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Chuyển đổi tên đồng tiền mã hóa từ bitcoin sang ethereum."
+      }
+    },
+    {
+      "id": "G09_multi_clarify_then_search",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Xem các tweet mới nhất giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Của Sam Altman nhé"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Lượt 1 thiếu handle -> Lượt 2 bổ sung Sam Altman và map sang handle sama."
+      }
+    },
+    {
+      "id": "G10_multi_out_of_scope_reset",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm tin AI hôm nay"
+        },
+        {
+          "role": "user",
+          "content": "Viết giúp mình một đoạn mã C++ sắp xếp mảng."
+        }
+      ],
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Lượt 2 yêu cầu viết code C++ ngoài phạm vi -> KHÔNG gọi tool."
+      }
+    }
+  ]
 }
