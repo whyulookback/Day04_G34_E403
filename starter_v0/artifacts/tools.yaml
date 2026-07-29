@@ -13,10 +13,10 @@ tools:
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
-      required: [question]
+        question: {type: string, default: "", description: "Câu hỏi gửi cho người dùng"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời — LUÔN đặt giá trị phù hợp"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn (chỉ dùng khi response_type='choice')"}
+      required: [question, response_type]
 
   - name: timeline
     description: "Lấy bài đăng gần đây của đúng một tài khoản đã được nêu rõ bằng handle hoặc tên account trong conversation. Không có tài khoản mặc định và không được tự chọn sama hay người nổi tiếng; nếu conversation không chứa account identity thì phải dùng clarify."
