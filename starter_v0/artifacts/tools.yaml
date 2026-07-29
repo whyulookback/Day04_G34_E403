@@ -9,14 +9,14 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Gửi một câu hỏi cho người dùng. LUÔN đặt response_type — 'text' khi hỏi thông tin còn thiếu (handle, URL...), 'yes_no' khi cần xác nhận trước hành động nhạy cảm, 'choice' khi đưa nhiều lựa chọn."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
-      required: [question]
+        question: {type: string, default: "", description: "Câu hỏi gửi cho người dùng"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời — LUÔN đặt giá trị phù hợp"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn (chỉ dùng khi response_type='choice')"}
+      required: [question, response_type]
 
   - name: timeline
     description: "Lấy các bài đăng gần đây."
@@ -76,6 +76,16 @@ tools:
         template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Khuôn"}
         headline: {type: string, default: "", description: "Tiêu đề"}
       required: [items, template]
+
+  - name: news
+    description: "Lấy tin tức mới nhất từ RSS (VnExpress, Tuổi Trẻ, BBC)."
+    parameters:
+      type: object
+      properties:
+        topic: {type: string, default: "general", description: "Chủ đề: 'công nghệ', 'kinh doanh', 'thể thao', 'general', 'technology'"}
+        source: {type: string, enum: [vnexpress, tuoitre, bbc], default: "vnexpress", description: "Nguồn tin — vnexpress, tuoitre, bbc"}
+        max_results: {type: integer, default: 5, description: "Số bài tối đa"}
+      required: [topic]
 
   # ---------------- Bonus tools ----------------
   - name: send
