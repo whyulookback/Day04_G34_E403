@@ -1,20 +1,17 @@
 # Day 04 Lab v2 Report — Research Agent
 
-> File này gồm 2 phần, deadline khác nhau:
-> - **PHẦN A — Giới thiệu agent**: ngắn gọn 1 trang để team khác hiểu nhanh agent có tool gì, làm được gì, thử bằng câu hỏi nào. Xong trước 11:30 để làm tài liệu phụ trợ khi demo.
-> - **PHẦN B — Chi tiết / Bằng chứng**: bảng đầy đủ (v0–v3, failure, eval, chat) dựa trên log thật. Có thể hoàn thiện sau buổi debate để nộp bài.
-
 ## Team
 
-- Team:G34
+- Team: G34
 - Members:
-    - Dương Minh Quân - 2A202601903
-    - Ngô Việt Anh - 2A202601579
-    - Phí Đình Hoàng Anh - 2A202601853
-    - Lê Thị Thuý - 2A202601381
-    - Ngô Đình Khánh - 2A202601625
-    - Trần Thị Kiều Oanh - 2A202601413
-- Provider/model: openrouter/openai/gpt-4o-mini
+  - Dương Minh Quân — 2A202601903
+  - Ngô Việt Anh — 2A202601579
+  - Phí Đình Hoàng Anh — 2A202601853
+  - Lê Thị Thuý — 2A202601381
+  - Ngô Đình Khánh — 2A202601625
+  - Trần Thị Kiều Oanh — 2A202601413
+- Provider/model: `openrouter/openai/gpt-4o-mini`
+- Final artifact: `v9+p5c7b7a015185+tecf7656f13ed`
 
 ---
 
@@ -24,13 +21,17 @@
 
 Research & Analytics Agent của nhóm G34: Đa năng trong việc tìm kiếm tin tức đa nguồn (Web, Twitter), tra cứu thời tiết, quy đổi tỷ giá ngoại tệ, theo dõi giá tiền mã hóa Crypto real-time, đọc nội dung URL và hỏi lại khi thiếu thông tin hoặc xin xác nhận trước khi thực hiện hành động nhạy cảm.
 
-**Link dùng thử (truy cập được trong showdown):**
+Chạy bằng:
 
 > Streamlit UI chạy tại địa chỉ local và có thể truy cập qua Cloudflare Tunnel:
 >
 > URL: `http://localhost:8501`
 
-## A2. Tool agent có
+Nếu team khác cần truy cập từ máy riêng trong showdown:
+
+```powershell
+cloudflared tunnel --url http://localhost:8501
+```
 
 | Tên tool | Làm được gì | Tool mới nhóm thêm? |
 |---|---|---|
@@ -65,13 +66,13 @@ Research & Analytics Agent của nhóm G34: Đa năng trong việc tìm kiếm t
 
 # PHẦN B — Chi tiết / Bằng chứng
 
-> Điều kiện metric hợp lệ: `provider_error_cases` phải bằng `0`; `measured_cases` phải bằng `total_cases`; và bất kỳ `tool_results` nào có error đều phải được review thủ công vì routing PASS không chứng minh tool execution đã đúng.
+Metric chỉ được dùng khi `provider_error_cases=0`,
+`measured_cases=total_cases`, và tool errors đã được review. Final base và group
+run đều đáp ứng các điều kiện này; `tool_errors=0`.
 
 ## B1. Version evidence
 
-Fill from `artifacts/version_log.csv` and `runs/*.json`.
-
-| Version | Prompt/tool change | Hypothesis | Metric name | Before | After | Run File |
+| Version | Thay đổi duy nhất | Giả thuyết / kết quả | Metric | Before | After | Run |
 |---|---|---|---|---:|---:|---|
 | v0 | baseline | Baseline run to establish initial performance benchmark | case_accuracy | 0.0 | 0.65 | runs/v0_B_base_openrouter_20260729T101023034591.json |
 | v1 | system_prompt.md | Instruct prompt on clarify rules, confirm before send, and out-of-scope handling | tool_routing_accuracy | 0.70 | 0.90 | runs/v1_B_base_openrouter_20260729T102352970001.json |
@@ -81,9 +82,7 @@ Fill from `artifacts/version_log.csv` and `runs/*.json`.
 
 ## B2. Failure analysis
 
-Use actual failures from `results[*].result.failures`.
-
-| Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
+| Case ID / Version | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
 | R03_web_news_routing | wrong_arg_value | lookup | Redundant words in query ("AI news" instead of "AI") | Clarify in system prompt to keep search queries clean |
 | R08_out_of_scope | out_of_scope | send | Called tool on out of scope query | Instruct prompt to return no tool when query is out of scope |
@@ -97,13 +96,13 @@ Use actual failures from `results[*].result.failures`.
 
 List the 10 cases added to `data/eval_group.json`:
 
-- 5 single-turn
-- 5 multi-turn
+Các run ban đầu từng có RapidAPI 403/429 dù routing PASS. Sau khi subscribe
+đúng plan, smoke test trả HTTP 200 và các final run có `tool_errors=0`. Đây là
+phần cần manual review vì automatic grader chỉ chấm routing/args.
 
-This section is for the mandatory team-authored eval set. Optional built-ins do
-not belong here.
+## B3. Team eval cases
 
-File template để trống có chủ đích; nhóm phải tự thiết kế đủ 10 case.
+Final evidence: `runs/v9_B_group_openrouter_20260729T113647727096.json`.
 
 | Case ID | What It Tests | Expected Tool/Behavior | Result |
 |---|---|---|---|
@@ -127,10 +126,6 @@ File template để trống có chủ đích; nhóm phải tự thiết kế đ�
 | Xác nhận trước khi đăng Telegram | v4 | `clarify(question="...", response_type="yes_no")` | `runs/v4_B_base_openrouter_20260729T111729366000.json` | Agent dừng lại hỏi xin xác nhận Yes/No |
 
 ## B5. Tool capability evidence
-
-Phân loại rõ tool mới bắt buộc, optional built-in và tool đủ điều kiện bonus. Chỉ ghi Telegram/PDF nếu nhóm thực sự dùng; base report không cần chúng.
-
-UI is core deliverable, not bonus. Do not list it here.
 
 | Category | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|

@@ -49,22 +49,22 @@ tools:
       required: [query]
 
   - name: fetch
-    description: "Lấy nội dung từ một địa chỉ."
+    description: "Fetch and read content from a specific URL. Use when the user provides a direct link to an article or page."
     parameters:
       type: object
       properties:
-        url: {type: string, default: "", description: "Địa chỉ"}
+        url: {type: string, default: "", description: "The full URL to fetch content from"}
       required: [url]
 
   - name: format
-    description: "Trình bày dữ liệu đã có thành văn bản."
+    description: "Format existing data into a readable text output (brief, sections, bullets, etc.)."
     parameters:
       type: object
       properties:
         items:
           type: array
           default: []
-          description: "Danh sách item"
+          description: "List of items to format"
           items:
             type: object
             properties:
@@ -73,48 +73,58 @@ tools:
               source: {type: string}
               summary: {type: string}
               section: {type: string}
-        template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Khuôn"}
-        headline: {type: string, default: "", description: "Tiêu đề"}
+        template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Output format template"}
+        headline: {type: string, default: "", description: "Headline/title for the output"}
       required: [items, template]
+
+  - name: keywords
+    description: "Trích từ khóa từ chính văn bản người dùng đã cung cấp. Chỉ dùng khi người dùng yêu cầu lấy từ khóa, tag hoặc chủ đề từ một đoạn text có sẵn; không dùng để tìm web, đọc URL hay thay cho lookup."
+    parameters:
+      type: object
+      properties:
+        text: {type: string, default: "", description: "Văn bản nguồn phải được người dùng cung cấp nguyên văn"}
+        max_keywords: {type: integer, default: 8, minimum: 1, maximum: 20, description: "Số từ khóa tối đa"}
+        min_length: {type: integer, default: 3, minimum: 2, maximum: 12, description: "Độ dài tối thiểu của từ"}
+      required: [text]
 
   # ---------------- Bonus tools ----------------
   - name: send
-    description: "Gửi một đoạn văn bản đi."
+    description: "Send a text message (e.g., to Telegram). Only use after the user has confirmed. Always ask for confirmation first via clarify."
     parameters:
       type: object
       properties:
-        text: {type: string, default: "", description: "Nội dung"}
-        confirmed: {type: boolean, default: false, description: "Cờ xác nhận"}
+        text: {type: string, default: "", description: "The message content to send"}
+        confirmed: {type: boolean, default: false, description: "Confirmation flag — must be true; ask user first"}
       required: [text]
 
   - name: policy
-    description: "Tìm trong tài liệu nội bộ."
+    description: "Search internal company policy documents. Use for questions about company rules, AI research policy, data privacy, etc."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Truy vấn"}
-        policy_area: {type: string, enum: [all, ai_research, source_citation, data_privacy, external_publishing, tool_usage], default: "all", description: "Nhóm"}
-        top_k: {type: integer, default: 3, description: "Số mục"}
+        query: {type: string, default: "", description: "Search query about the policy"}
+        policy_area: {type: string, enum: [all, ai_research, source_citation, data_privacy, external_publishing, tool_usage], default: "all", description: "Policy area to search in"}
+        top_k: {type: integer, default: 3, description: "Number of results"}
       required: [query]
 
   - name: papers
-    description: "Tìm bài báo khoa học."
+    description: "Search for academic papers on arXiv."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Từ khóa"}
-        max_results: {type: integer, default: 5, description: "Số lượng"}
-        sort_by: {type: string, enum: [relevance, lastUpdatedDate, submittedDate], default: "relevance", description: "Sắp xếp"}
+        query: {type: string, default: "", description: "Search keywords"}
+        max_results: {type: integer, default: 5, description: "Number of results"}
+        sort_by: {type: string, enum: [relevance, lastUpdatedDate, submittedDate], default: "relevance", description: "Sort order"}
       required: [query]
 
   - name: paper_text
-    description: "Lấy nội dung text của một bài báo."
+    description: "Extract text content from an arXiv paper URL."
     parameters:
       type: object
       properties:
-        arxiv_url: {type: string, default: "", description: "ID hoặc địa chỉ"}
-        max_pages: {type: integer, default: 5, description: "Số trang"}
-        max_chars: {type: integer, default: 8000, description: "Số ký tự"}
+        arxiv_url: {type: string, default: "", description: "ArXiv URL or ID"}
+        max_pages: {type: integer, default: 5, description: "Max pages to extract"}
+        max_chars: {type: integer, default: 8000, description: "Max characters to return"}
       required: [arxiv_url]
 
   # ---------------- Team Custom New Tools (Bonus) ----------------
