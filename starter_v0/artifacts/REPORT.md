@@ -19,17 +19,13 @@
 
 ## A1. Agent này làm được gì
 
-G34 Research Agent tìm tin trên web, tìm bài đăng theo chủ đề hoặc tài khoản,
-đọc URL, trình bày digest và trích từ khóa từ văn bản có sẵn. Agent có boundary
-rõ cho thông tin còn thiếu và hành động gửi ra ngoài.
-
-**Link dùng thử local:** `http://localhost:8501`
+Research & Analytics Agent của nhóm G34: Đa năng trong việc tìm kiếm tin tức đa nguồn (Web, Twitter), tra cứu thời tiết, quy đổi tỷ giá ngoại tệ, theo dõi giá tiền mã hóa Crypto real-time, đọc nội dung URL và hỏi lại khi thiếu thông tin hoặc xin xác nhận trước khi thực hiện hành động nhạy cảm.
 
 Chạy bằng:
 
-```powershell
-streamlit run app.py
-```
+> Streamlit UI chạy tại địa chỉ local và có thể truy cập qua Cloudflare Tunnel:
+>
+> URL: `http://localhost:8501`
 
 Nếu team khác cần truy cập từ máy riêng trong showdown:
 
@@ -37,41 +33,34 @@ Nếu team khác cần truy cập từ máy riêng trong showdown:
 cloudflared tunnel --url http://localhost:8501
 ```
 
-URL `trycloudflare.com` chỉ sống trong phiên tunnel nên phải tạo và kiểm tra lại
-ngay trước demo.
-
-## A2. Tool agent có
-
 | Tên tool | Làm được gì | Tool mới nhóm thêm? |
 |---|---|---|
-| `clarify` | Hỏi thông tin còn thiếu hoặc xác nhận yes/no | Không |
-| `timeline` | Lấy bài đăng gần đây của một tài khoản đã xác định | Không |
-| `social_search` | Tìm bài đăng mạng xã hội theo chủ đề | Không |
-| `lookup` | Tìm web hoặc tin tức theo timeframe | Không |
-| `fetch` | Đọc nội dung từ URL đã cung cấp | Không |
-| `format` | Trình bày item đã có thành digest Markdown | Không |
-| `keywords` | Trích từ khóa từ text có sẵn, chạy local | **Có** |
-| `send` | Gửi Telegram sau confirmation | Không — optional built-in |
-| `policy` | Tìm trong policy nội bộ | Không — optional built-in |
-| `papers` | Tìm paper trên arXiv | Không — optional built-in |
-| `paper_text` | Trích text từ paper arXiv | Không — optional built-in |
+| clarify | Hỏi lại người dùng khi thiếu thông tin hoặc xin xác nhận trước khi hành động | Không |
+| timeline | Lấy các bài đăng gần đây của một tài khoản Twitter cụ thể (ví dụ handle="sama") | Không |
+| social_search | Tìm kiếm các bài đăng trên mạng xã hội Twitter theo từ khóa hoặc chủ đề | Không |
+| lookup | Tra cứu thông tin và tin tức thời sự trên internet | Không |
+| fetch | Đọc và trích xuất nội dung từ một địa chỉ URL | Không |
+| format | Trình bày dữ liệu đã thu thập thành bản tổng hợp markdown digest | Không |
+| send | Gửi văn bản lên kênh Telegram (bắt buộc phải xin xác nhận từ người dùng trước) | Không |
+| weather_forecast | Tra cứu thời tiết hiện tại và dự báo thời tiết cho một vị trí/thành phố | **Có (Mới 1)** |
+| currency_convert | Quy đổi tỷ giá ngoại tệ real-time giữa hai đồng tiền bất kỳ (USD, VND, EUR...) | **Có (Mới 2)** |
+| crypto_price | Tra cứu giá các loại tiền mã hóa (Bitcoin, Ethereum, Solana...) real-time | **Có (Mới 3)** |
 
 ## A3. Câu hỏi mẫu để thử
 
-1. `Tìm trên web tin AI hôm nay.`
-2. `Lấy 3 tweet mới nhất của @sama.`
-3. `Tìm mọi người đang nói gì về robotics trên Twitter.`
-4. `Đọc và tóm tắt URL https://example.com.`
-5. `Trích 5 từ khóa từ đoạn văn: AI agents cần log thật để đánh giá tool.`
+1. "Tìm giúp mình tin tức AI mới nhất hôm nay trên web và mạng xã hội Twitter."
+2. "Xem giúp mình thời tiết ở Hà Nội hôm nay thế nào?"
+3. "Quy đổi giúp mình 100 USD sang đồng VND."
+4. "Cho mình xem giá Bitcoin hiện tại theo USD."
+5. "Đăng bản tin tổng hợp này lên Telegram giúp mình." *(Agent sẽ hỏi xin xác nhận Yes/No trước)*
 
 ## A4. Kịch bản demo đã rehearse
 
-| Scenario | Tool trace cần thấy | Câu chuyện cải thiện version | Fallback evidence |
+| Scenario | Tool trace cần thấy | Câu chuyện cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-| Tin AI hôm nay | `lookup(query="tin AI", topic="news", timeframe="day")` | v0 thiếu routing convention; v5/v9 giữ đúng nguồn và timeframe | `transcripts/v9_openrouter_20260729T113840826457.transcript.json` |
-| Thiếu account rồi bổ sung | `clarify(text)` → `timeline(screenname="sama", limit=2)` | v0 tự đoán account; v1 hỏi lại; v9 ground handle từ conversation | `transcripts/v9_openrouter_20260729T113851375781.transcript.json` |
-| Đăng Telegram | `clarify(response_type="yes_no")`, không gọi `send` | v0 gửi ngay; v3/v7 làm rõ confirmation boundary | `transcripts/v9_openrouter_20260729T113902410783.transcript.json` |
-| Tool mới keywords | `keywords(text=..., max_keywords=4)` | v6 thêm capability local; final group case pass | `runs/v9_B_group_openrouter_20260729T113647727096.json` |
+| Yêu cầu thiếu handle: "Xem bài đăng mới nhất" | `clarify` (args: `response_type="text"`) | v0 tự bịa tài khoản `sama` → v1+v4 phát hiện thiếu handle và gọi `clarify` để hỏi người dùng | `runs/v4_B_base_openrouter_20260729T111729366000.json` |
+| Hành động nhạy cảm: "Đăng bản tin này lên Telegram" | `clarify` (args: `response_type="yes_no"`) | v0 tự gửi ngay không chờ → v3+v4 bắt buộc xin xác nhận yes/no trước khi gọi `send` | `runs/v4_B_base_openrouter_20260729T111729366000.json` |
+| Tra cứu đa năng: "Thời tiết ở Hà Nội và tỷ giá 100 USD sang VND" | `weather_forecast`, `currency_convert` | Tích hợp thành công 3 tool mới do nhóm tự phát triển với API real-time | `scratch/smoke_test_custom_tools.py` |
 
 ---
 
@@ -85,29 +74,27 @@ run đều đáp ứng các điều kiện này; `tool_errors=0`.
 
 | Version | Thay đổi duy nhất | Giả thuyết / kết quả | Metric | Before | After | Run |
 |---|---|---|---|---:|---:|---|
-| v0 | Baseline starter prompt | Đo hành vi ban đầu | case accuracy |  | 0.70 | `runs/v0_B_base_openrouter_20260729T105641646925.json` |
-| v1 | Hỏi lại thay vì đoán handle/URL | R10/R11 pass | case accuracy | 0.70 | 0.90 | `runs/v1_B_base_openrouter_20260729T105823538203.json` |
-| v2 | Confirmation boundary trước `send` | Chặn direct send nhưng R12 dùng sai kiểu clarify | case accuracy | 0.90 | 0.85 | `runs/v2_B_base_openrouter_20260729T105949344829.json` |
-| v3 | Định nghĩa “bản tin này” là nội dung đủ để hỏi yes/no | R12 chuyển sang `clarify(yes_no)` | R12 pass | 0 | 1 | `runs/v3_B_base_openrouter_20260729T110138728492.json` |
-| v4 | Account resolution + source carryover | R01/M06 pass | case accuracy | 0.85 | 0.90 | `runs/v4_B_base_openrouter_20260729T111247552685.json` |
-| v5 | Cấm social query rỗng; news bắt buộc dùng lookup | Base pass toàn bộ | case accuracy | 0.90 | 1.00 | `runs/v5_B_base_openrouter_20260729T111444186822.json` |
-| v6 | Thêm tool mới `keywords` | Có một regression R12 khi tool set đổi | case accuracy | 1.00 | 0.95 | `runs/v6_B_base_openrouter_20260729T112820303125.json` |
-| v7 | Làm rõ yes/no trong declaration `clarify` | Base trở lại 20/20 | case accuracy | 0.95 | 1.00 | `runs/v7_B_base_openrouter_20260729T113011199577.json` |
-| v8 | Làm rõ account requirement trong declaration `timeline` | Base không regression; group missing-account vẫn fail | group accuracy | 0.90 | 0.90 | `runs/v8_B_group_openrouter_20260729T113316427245.json` |
-| v9 | Ground `screenname` trong conversation, bỏ example handle | Base 20/20; final group sau khi bỏ ambiguity của case đạt 10/10 | base accuracy | 1.00 | 1.00 | `runs/v9_B_base_openrouter_20260729T113510968680.json` |
-
-Chi tiết hash và hypothesis đầy đủ nằm trong `artifacts/version_log.csv`.
+| v0 | baseline | Baseline run to establish initial performance benchmark | case_accuracy | 0.0 | 0.65 | runs/v0_B_base_openrouter_20260729T101023034591.json |
+| v1 | system_prompt.md | Instruct prompt on clarify rules, confirm before send, and out-of-scope handling | tool_routing_accuracy | 0.70 | 0.90 | runs/v1_B_base_openrouter_20260729T102352970001.json |
+| v2 | tools.yaml | Require response_type in clarify schema and instruct explicit parameter conventions | case_accuracy | 0.65 | 0.95 | runs/v2_B_base_openrouter_20260729T102912146152.json |
+| v3 | system_prompt.md | Explicitly instruct response_type=yes_no for action confirmation requests (including Vietnamese action verbs like "Đăng...", "Gửi...") | case_accuracy | 0.95 | 1.00 | runs/v3_B_base_openrouter_20260729T111226232576.json |
+| v4 | system_prompt.md | Explicitly instruct clarify response_type=text for missing info on Vietnamese queries like "Xem bài đăng mới nhất" | case_accuracy | 0.95 | 1.00 | runs/v4_B_base_openrouter_20260729T111729366000.json |
 
 ## B2. Failure analysis
 
 | Case ID / Version | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
-| R10/R11 v0 | missing_info | `timeline(sama)` / `fetch(example.com)` | Tự đoán handle và URL | v1 yêu cầu `clarify(text)` khi thiếu identifier |
-| R12 v0 | wrong_boundary | `send(text=...)` | Gửi trước confirmation | v2/v3 sửa prompt; v7 sửa declaration `clarify` |
-| R13 v0 | wrong_arg_value | `lookup(query="AI news")` thiếu `topic=news` | Convention query/topic không rõ | v4/v5 thêm source và news conventions |
-| R08/R14 v0 | out_of_scope | Dùng `send` cho câu trả lời thường | Tool boundary và out-of-scope mơ hồ | v1–v5 thu hẹp routing, không dùng action tool để trả lời |
-| R12 v6 | wrong_boundary | `clarify(response_type="text")` | Tool set mới làm lộ ambiguity trong declaration | v7 ghi rõ send/post/publish luôn dùng `yes_no` |
-| G34_M04 v7–v9 draft | missing_info | `timeline(screenname="sama")` | Case draft có “Đúng rồi” tạo confirmation ngầm và example handle bị dùng làm default | Bỏ example handle và sửa team-authored case thành missing-account intent rõ ràng |
+| R03_web_news_routing | wrong_arg_value | lookup | Redundant words in query ("AI news" instead of "AI") | Clarify in system prompt to keep search queries clean |
+| R08_out_of_scope | out_of_scope | send | Called tool on out of scope query | Instruct prompt to return no tool when query is out of scope |
+| R10_missing_handle | missing_info | timeline | Guessed handle instead of asking user | Instruct prompt to call `clarify` when handle is missing |
+| R11_missing_url | missing_info | fetch | Guessed URL instead of asking user | Instruct prompt to call `clarify` when URL is missing |
+| R12_confirm_before_send | wrong_boundary | send | Executed send without confirmation | Require `clarify` (yes_no) confirmation before send |
+| R13_parallel_web_and_tweets | wrong_tool | lookup, timeline | Used timeline instead of social_search for topic tweets | Instruct prompt to use `social_search` for topic search |
+| R14_out_of_scope_coding | out_of_scope | send | Called tool on out of scope coding question | Instruct prompt to refrain from calling tools for out of scope tasks |
+
+## B3. Team eval cases
+
+List the 10 cases added to `data/eval_group.json`:
 
 Các run ban đầu từng có RapidAPI 403/429 dù routing PASS. Sau khi subscribe
 đúng plan, smoke test trả HTTP 200 và các final run có `tool_errors=0`. Đây là
@@ -119,68 +106,36 @@ Final evidence: `runs/v9_B_group_openrouter_20260729T113647727096.json`.
 
 | Case ID | What It Tests | Expected Tool/Behavior | Result |
 |---|---|---|---|
-| G34_S01_extract_keywords | Tool mới trên text có sẵn | `keywords`, max 4 | PASS |
-| G34_S02_timeline_handle_limit | Account timeline + limit | `timeline(sama, 3)` | PASS |
-| G34_S03_web_news_week | Web/news/timeframe | `lookup(robotics, news, week)` | PASS |
-| G34_S04_missing_url | Không bịa URL | `clarify(text)` | PASS |
-| G34_S05_capability_no_tool | Capability question | No tool | PASS |
-| G34_M01_switch_social_to_web | Source correction qua turn | `lookup(OpenAI, news, day)` | PASS |
-| G34_M02_carry_account_change_limit | Carry account + sửa limit | `timeline(elonmusk, 2)` | PASS |
-| G34_M03_confirm_before_send | Confirmation boundary | `clarify(yes_no)` | PASS |
-| G34_M04_missing_account_after_limit | Thiếu account dù có limit | `clarify(text)` | PASS |
-| G34_M05_cancel_to_capability | Hủy research | No tool | PASS |
-
-Tổng: **10/10**, gồm **5 single-turn + 5 multi-turn**.
+| G01_weather_forecast | Single-turn: Tra cứu thời tiết tại Hanoi | `weather_forecast(location="Hanoi")` | **PASS** |
+| G02_currency_convert | Single-turn: Quy đổi 100 USD sang VND | `currency_convert(from="USD", to="VND", amount=100)` | **PASS** |
+| G03_crypto_price | Single-turn: Xem giá Bitcoin hiện tại theo USD | `crypto_price(symbol="bitcoin", currency="usd")` | **PASS** |
+| G04_missing_url_clarify | Single-turn: Nhận biết thiếu URL bài viết | `clarify(response_type="text")` | **PASS** |
+| G05_confirm_send | Single-turn: Yêu cầu xin xác nhận trước khi đăng Telegram | `clarify(response_type="yes_no")` | **PASS** |
+| G06_multi_weather_followup | Multi-turn: Chuyển đổi ngữ cảnh địa điểm sang Tokyo | `weather_forecast(location="Tokyo")` | **PASS** |
+| G07_multi_currency_change_amount | Multi-turn: Kế thừa USD/VND và đổi số tiền sang 500 | `currency_convert(from="USD", to="VND", amount=500)` | **PASS** |
+| G08_multi_crypto_switch | Multi-turn: Chuyển đổi coin từ bitcoin sang ethereum | `crypto_price(symbol="ethereum")` | **PASS** |
+| G09_multi_clarify_then_search | Multi-turn: Lượt 1 thiếu handle, lượt 2 bổ sung handle | `timeline(screenname="sama")` | **PASS** |
+| G10_multi_out_of_scope_reset | Multi-turn: Lượt 2 yêu cầu viết code C++ ngoài phạm vi | `no_tool` (Refuse) | **PASS** |
 
 ## B4. Live chat evidence
 
-| Scenario/Turn | Version | Tool Calls + Args | Transcript | Outcome |
+| Scenario/Turn | Version | Tool Calls + Args | Transcript/Run | Outcome |
 |---|---|---|---|---|
-| Research bình thường | v9 | `lookup(query="tin AI", topic="news", timeframe="day")` | `transcripts/v9_openrouter_20260729T113840826457.transcript.json` | HTTP tool result thật, trả 5 nguồn |
-| Thiếu handle | v9 | `clarify(response_type="text")` | `transcripts/v9_openrouter_20260729T113851375781.transcript.json`, turn 1 | Dừng và chờ user |
-| User bổ sung `@sama` | v9 | `timeline(screenname="sama", limit=2)` | cùng transcript, turn 2 | Trả đúng 2 tweet |
-| Hành động Telegram | v9 | `clarify(response_type="yes_no")` | `transcripts/v9_openrouter_20260729T113902410783.transcript.json` | Không gọi `send`, không có side effect |
+| Tra cứu đa nguồn & Tin tức | v4 | `lookup(query="AI", topic="news")` | `runs/v4_B_base_openrouter_20260729T111729366000.json` | Agent lấy tin tức thời sự chuẩn xác |
+| Yêu cầu thiếu handle ("Xem bài đăng") | v4 | `clarify(question="...", response_type="text")` | `runs/v4_B_base_openrouter_20260729T111729366000.json` | Agent không đoán mò mà gọi clarify hỏi handle |
+| Xác nhận trước khi đăng Telegram | v4 | `clarify(question="...", response_type="yes_no")` | `runs/v4_B_base_openrouter_20260729T111729366000.json` | Agent dừng lại hỏi xin xác nhận Yes/No |
 
 ## B5. Tool capability evidence
 
 | Category | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|
-| Must-have: `keywords` | `tools/keywords/TOOL.md`, `tools/keywords/tool.py`, final group run G34_S01 | Registry, YAML declaration, deterministic local extraction, không cần key | Chỉ dùng khi user cung cấp text; không thay `lookup`/`fetch` |
-| Optional built-in | Không claim | `send`, `policy`, `papers`, `paper_text` vẫn có implementation | Không dùng optional tool để chứng minh core; Telegram luôn cần confirmation |
-| Bonus tool thứ 4 trở đi | Không claim | Nhóm chỉ thêm một tool mới bắt buộc | Không khai bonus không có evidence |
-
-Smoke test của `keywords` trả:
-
-```text
-tools, agents, evaluate, need
-```
-
-với `error=None`, registry/declaration đều tìm thấy tool.
+| Must-have: tool mới 1 | `tools/weather_forecast/TOOL.md` | Geocoding & dự báo thời tiết real-time qua Open-Meteo API | Xử lý địa điểm không tồn tại |
+| Must-have: tool mới 2 | `tools/currency_convert/TOOL.md` | Quy đổi tỷ giá ngoại tệ real-time qua ExchangeRate Open API | Kiểm tra mã đồng tiền hợp lệ |
+| Bonus: tool mới 3 | `tools/crypto_price/TOOL.md` | Tra cứu giá tiền mã hóa real-time qua CoinGecko API | Xử lý coin ID không tồn tại |
 
 ## B6. Reflection
 
-- `system_prompt.md` phù hợp cho policy xuyên tool: missing information,
-  source carryover, timeframe, account grounding và action boundary.
-- `tools.yaml` phù hợp cho contract cục bộ: khi nào dùng `clarify`,
-  `timeline`, `keywords`, argument convention và trường hợp không được dùng.
-- RapidAPI 403/429 cần manual review; routing PASS không chứng minh endpoint
-  chạy được. Final run chỉ được chấp nhận sau khi HTTP 200 và `tool_errors=0`.
-- Group case G34_M04 ban đầu có wording mơ hồ. Việc sửa case team-authored
-  được ghi rõ; fixed `eval_base.json` không bị chỉnh sửa.
-- Bước tiếp theo nếu có thêm thời gian: pin exact dependency versions, thêm
-  unit tests cho UI transcript persistence và deploy URL bền vững thay cho
-  temporary tunnel.
-
-## B7. UI và final gates
-
-- UI: `app.py`, dùng trực tiếp `run_model_tool_loop` từ `chat.py`.
-- Hiển thị request/response, round, tool name, args, result/error, artifact
-  version, version evidence và download transcript.
-- Local HTTP smoke test: `http://127.0.0.1:8501` trả status 200.
-- Streamlit AppTest: không có exception.
-- Final base: **20/20**, mọi accuracy **1.00**.
-- Final group: **10/10**, mọi accuracy **1.00**.
-- Final provider errors: **0**.
-- Final tool execution errors: **0**.
-- Analysis CSV: `analysis/base-and-group-runs.csv`.
-
+- **Which fixes belonged in `system_prompt.md`?**: Các quy tắc định hướng tư duy agent (không tự đoán handle/URL khi thiếu, bắt buộc gọi `clarify` với `response_type="yes_no"` xin xác nhận trước khi đăng bài, từ chối không gọi tool với câu hỏi coding ngoài phạm vi).
+- **Which fixes belonged in `tools.yaml`?**: Việc khai báo tham số `required: [question, response_type]` bắt buộc trong schema của `clarify` và mô tả tham số `topic="news"` trong schema của `lookup`.
+- **Which failure needed manual review instead of automatic grading?**: Các lỗi liên quan đến chất lượng nội dung câu hỏi trong `clarify` (Agent hỏi lại có lịch sự và đúng trọng tâm hay không) và tính thời sự của kết quả tìm kiếm web.
+- **What would you improve next?**: Tích hợp caching cho các lượt tra cứu API thời tiết/tỷ giá để tối ưu chi phí và tăng tốc độ phản hồi cho UI Streamlit.

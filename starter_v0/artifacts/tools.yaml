@@ -9,43 +9,43 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Hỏi người dùng khi thiếu thông tin bắt buộc hoặc cần xác nhận hành động. Với send/post/publish, luôn dùng response_type=yes_no; tham chiếu như 'bản tin này' là đủ cho bước xác nhận và không được đổi thành câu hỏi text để xin lại nội dung."
+    description: "Gửi một câu hỏi cho người dùng khi thiếu thông tin hoặc khi cần xin xác nhận."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi gửi cho người dùng"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời — LUÔN đặt giá trị phù hợp"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn (chỉ dùng khi response_type='choice')"}
+        question: {type: string, default: "", description: "Nội dung câu hỏi gửi người dùng"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời: 'text' khi yêu cầu điền/cung cấp thêm thông tin thiếu; 'yes_no' khi cần xin xác nhận đồng ý/từ chối trước khi hành động"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn khi response_type là choice"}
       required: [question, response_type]
 
   - name: timeline
-    description: "Lấy bài đăng gần đây của đúng một tài khoản đã được nêu rõ bằng handle hoặc tên account trong conversation. Không có tài khoản mặc định và không được tự chọn sama hay người nổi tiếng; nếu conversation không chứa account identity thì phải dùng clarify."
+    description: "Lấy các bài đăng gần đây của một tài khoản Twitter cụ thể (dùng screenname/handle như 'sama')."
     parameters:
       type: object
       properties:
-        screenname: {type: string, default: "", description: "The user's Twitter handle (e.g., sama, elonmusk, karpathy)"}
-        limit: {type: integer, default: 5, description: "Number of tweets to retrieve"}
+        screenname: {type: string, default: "", description: "Tên tài khoản Twitter handle (ví dụ 'sama')"}
+        limit: {type: integer, default: 5, description: "Số lượng bài đăng"}
       required: [screenname]
 
   - name: social_search
-    description: "Search for posts/tweets about a topic on social media. Use for tweets ABOUT a topic, not from a specific person."
+    description: "Tìm kiếm các bài đăng trên mạng xã hội Twitter theo từ khóa hoặc chủ đề."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Search keyword or phrase"}
-        search_type: {type: string, enum: [Latest, Top], default: "Latest", description: "Sort order: Latest for recent, Top for popular"}
-        limit: {type: integer, default: 5, description: "Number of results"}
+        query: {type: string, default: "", description: "Từ khóa cần tìm"}
+        search_type: {type: string, enum: [Latest, Top], default: "Latest", description: "Cách sắp xếp"}
+        limit: {type: integer, default: 5, description: "Số lượng bài đăng"}
       required: [query]
 
   - name: lookup
-    description: "Search the web for news or general information. Use for web searches including news articles."
+    description: "Tra cứu thông tin trên internet. Đặt topic='news' khi tìm kiếm tin tức hoặc thời sự."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Search query (topic only, do not include type like 'news')"}
-        topic: {type: string, enum: [general, news], default: "general", description: "Category: news for current events, general for other web info"}
-        timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Time range: day for hôm nay, week for tuần này, etc."}
-        max_results: {type: integer, default: 5, description: "Number of results"}
+        query: {type: string, default: "", description: "Từ khóa tìm kiếm ngắn gọn"}
+        topic: {type: string, enum: [general, news], default: "general", description: "Đặt 'news' nếu tìm tin tức; 'general' cho tìm kiếm chung"}
+        timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Khoảng thời gian tìm kiếm"}
+        max_results: {type: integer, default: 5, description: "Số kết quả tối đa"}
       required: [query]
 
   - name: fetch
@@ -127,11 +127,31 @@ tools:
         max_chars: {type: integer, default: 8000, description: "Max characters to return"}
       required: [arxiv_url]
 
-  - name: hn_search
-    description: "Tìm kiếm các bài thảo luận, bài đăng và tin tức công nghệ trên HackerNews."
+  # ---------------- Team Custom New Tools (Bonus) ----------------
+  - name: weather_forecast
+    description: "Tra cứu thời tiết hiện tại và dự báo thời tiết cho một vị trí/thành phố."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Từ khóa tìm kiếm trên HackerNews"}
-        limit: {type: integer, default: 5, description: "Số lượng kết quả trả về"}
-      required: [query]
+        location: {type: string, default: "", description: "Tên thành phố hoặc vị trí (ví dụ 'Hanoi', 'Tokyo')"}
+        days: {type: integer, default: 1, description: "Số ngày dự báo (1 đến 7)"}
+      required: [location]
+
+  - name: currency_convert
+    description: "Quy đổi tỷ giá ngoại tệ giữa hai đồng tiền (ví dụ USD sang VND)."
+    parameters:
+      type: object
+      properties:
+        from_currency: {type: string, default: "USD", description: "Mã đồng tiền gốc (ví dụ 'USD', 'EUR')"}
+        to_currency: {type: string, default: "VND", description: "Mã đồng tiền đích (ví dụ 'VND', 'USD')"}
+        amount: {type: number, default: 1.0, description: "Số tiền cần quy đổi"}
+      required: [from_currency, to_currency]
+
+  - name: crypto_price
+    description: "Tra cứu giá tiền mã hóa (Bitcoin, Ethereum, Solana...) theo thời gian thực."
+    parameters:
+      type: object
+      properties:
+        symbol: {type: string, default: "", description: "Tên tiền mã hóa (ví dụ 'bitcoin', 'ethereum', 'solana')"}
+        currency: {type: string, default: "usd", description: "Đơn vị tiền tệ quy đổi (ví dụ 'usd', 'vnd')"}
+      required: [symbol]

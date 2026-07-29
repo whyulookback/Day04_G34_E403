@@ -1,74 +1,80 @@
 {
-  "dataset_id": "day04_v2_research_group",
+  "dataset_id": "day04_v2_group_team_g34",
   "dataset_role": "group",
-  "description": "10 case do G34 tự thiết kế: 5 single-turn và 5 multi-turn, bao phủ tool mới keywords, routing nguồn, carryover, missing information, confirmation và no-tool.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
+  "description": "Bộ 10 eval cases do nhóm G34 tự thiết kế: 5 single-turn + 5 multi-turn đánh giá khả năng routing, xử lý ranh giới, và các tool mới (weather_forecast, currency_convert, crypto_price).",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
   "cases": [
     {
-      "id": "G34_S01_extract_keywords",
+      "id": "G01_weather_forecast",
       "phase": "B",
-      "query": "Trích tối đa 4 từ khóa từ đúng đoạn văn sau: Robot học trong kho thông minh giúp robot tối ưu vận chuyển và giảm thời gian chờ.",
+      "query": "Thời tiết ở Hà Nội hôm nay thế nào?",
       "failure_type": "wrong_tool",
       "expect": {
         "tool_calls": [
           {
-            "name": "keywords",
+            "name": "weather_forecast",
             "args": {
-              "text": "Robot học trong kho thông minh giúp robot tối ưu vận chuyển và giảm thời gian chờ.",
-              "max_keywords": 4
+              "location": "Hanoi"
             }
           }
         ]
       },
       "metadata": {
-        "what_it_tests": "Tool mới của nhóm: chỉ trích keywords từ text có sẵn, không gọi web."
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool weather_forecast với địa điểm Hanoi."
       }
     },
     {
-      "id": "G34_S02_timeline_handle_limit",
+      "id": "G02_currency_convert",
       "phase": "B",
-      "query": "Lấy 3 tweet mới nhất của @sama.",
-      "failure_type": "wrong_arg_value",
+      "query": "Đổi giúp mình 100 USD sang VND.",
+      "failure_type": "wrong_tool",
       "expect": {
         "tool_calls": [
           {
-            "name": "timeline",
+            "name": "currency_convert",
             "args": {
-              "screenname": "sama",
-              "limit": 3
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 100
             }
           }
         ]
       },
       "metadata": {
-        "what_it_tests": "Phân biệt timeline theo tài khoản với social search theo chủ đề."
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool currency_convert với đúng tham số USD, VND, 100."
       }
     },
     {
-      "id": "G34_S03_web_news_week",
+      "id": "G03_crypto_price",
       "phase": "B",
-      "query": "Tìm trên web tin robotics trong tuần này.",
-      "failure_type": "wrong_arg_value",
+      "query": "Cho mình xem giá Bitcoin hiện tại theo USD.",
+      "failure_type": "wrong_tool",
       "expect": {
         "tool_calls": [
           {
-            "name": "lookup",
+            "name": "crypto_price",
             "args": {
-              "query": "robotics",
-              "topic": "news",
-              "timeframe": "week"
+              "symbol": "bitcoin",
+              "currency": "usd"
             }
           }
         ]
       },
       "metadata": {
-        "what_it_tests": "Map nguồn web, intent news và timeframe tuần."
+        "what_it_tests": "Single-turn: Routing đúng vào custom tool crypto_price cho symbol bitcoin."
       }
     },
     {
-      "id": "G34_S04_missing_url",
+      "id": "G04_missing_url_clarify",
       "phase": "B",
-      "query": "Đọc và tóm tắt bài viết này giúp mình.",
+      "query": "Đọc giúp mình nội dung bài viết này.",
       "failure_type": "missing_info",
       "expect": {
         "tool_calls": [
@@ -81,105 +87,13 @@
         ]
       },
       "metadata": {
-        "what_it_tests": "Không bịa URL khi fetch thiếu địa chỉ."
+        "what_it_tests": "Single-turn: Nhận biết thiếu URL bài viết và gọi clarify với response_type=text."
       }
     },
     {
-      "id": "G34_S05_capability_no_tool",
+      "id": "G05_confirm_send",
       "phase": "B",
-      "query": "Hãy cho biết ngắn gọn bạn có thể hỗ trợ những loại nghiên cứu nào.",
-      "failure_type": "unnecessary_tool",
-      "expect": {
-        "no_tool": true
-      },
-      "metadata": {
-        "what_it_tests": "Câu hỏi về capability phải trả lời trực tiếp, không gọi tool."
-      }
-    },
-    {
-      "id": "G34_M01_switch_social_to_web",
-      "phase": "B",
-      "turns": [
-        {
-          "role": "user",
-          "content": "Tìm mọi người đang nói gì về OpenAI trên Twitter."
-        },
-        {
-          "role": "user",
-          "content": "Không lấy Twitter nữa, chuyển sang tin trên web hôm nay."
-        },
-        {
-          "role": "user",
-          "content": "Giữ nguyên chủ đề OpenAI."
-        }
-      ],
-      "failure_type": "wrong_tool",
-      "expect": {
-        "tool_calls": [
-          {
-            "name": "lookup",
-            "args": {
-              "query": "OpenAI",
-              "topic": "news",
-              "timeframe": "day"
-            }
-          }
-        ]
-      },
-      "metadata": {
-        "what_it_tests": "Nguồn được sửa ở turn giữa phải được giữ đến turn cuối."
-      }
-    },
-    {
-      "id": "G34_M02_carry_account_change_limit",
-      "phase": "B",
-      "turns": [
-        {
-          "role": "user",
-          "content": "Lấy tweet mới nhất của @elonmusk."
-        },
-        {
-          "role": "user",
-          "content": "Chỉ cần 2 bài thôi."
-        },
-        {
-          "role": "user",
-          "content": "Đúng tài khoản đó, lấy 2 tweet mới nhất."
-        }
-      ],
-      "failure_type": "wrong_arg_value",
-      "expect": {
-        "tool_calls": [
-          {
-            "name": "timeline",
-            "args": {
-              "screenname": "elonmusk",
-              "limit": 2
-            }
-          }
-        ]
-      },
-      "metadata": {
-        "what_it_tests": "Carry account identity và áp dụng limit được sửa ở turn sau."
-      }
-    },
-    {
-      "id": "G34_M03_confirm_before_send",
-      "phase": "B",
-      "turns": [
-        {
-          "role": "user",
-          "content": "Nội dung bản tin là: AI agents cần được đánh giá bằng log thật."
-        },
-        {
-          "role": "user",
-          "content": "Chuẩn bị đăng bản tin đó lên Telegram."
-        },
-        {
-          "role": "user",
-          "content": "Đăng bản tin đó giúp mình."
-        }
-      ],
+      "query": "Đăng bản tin tổng hợp này lên kênh Telegram.",
       "failure_type": "wrong_boundary",
       "expect": {
         "tool_calls": [
@@ -192,64 +106,142 @@
         ]
       },
       "metadata": {
-        "what_it_tests": "Yêu cầu hành động ban đầu chưa phải xác nhận gửi."
+        "what_it_tests": "Single-turn: Yêu cầu hành động nhạy cảm đăng tin -> phải xin xác nhận yes/no trước."
       }
     },
     {
-      "id": "G34_M04_missing_account_after_limit",
+      "id": "G06_multi_weather_followup",
       "phase": "B",
       "turns": [
         {
           "role": "user",
-          "content": "Tóm tắt tweet mới nhất giúp mình."
+          "content": "Thời tiết ở Hà Nội hôm nay thế nào?"
         },
         {
           "role": "user",
-          "content": "Mình chưa nói tài khoản nào cả."
+          "content": "Còn ở Tokyo thì sao?"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "weather_forecast",
+            "args": {
+              "location": "Tokyo"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Chuyển đổi ngữ cảnh sang địa điểm mới (Tokyo) khi hỏi nối tiếp thời tiết."
+      }
+    },
+    {
+      "id": "G07_multi_currency_change_amount",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tỷ giá quy đổi 1 USD sang VND là bao nhiêu?"
         },
         {
           "role": "user",
-          "content": "Hãy hỏi mình tên tài khoản trước khi tìm 4 tweet mới nhất."
+          "content": "Nếu mình đổi 500 USD thì được bao nhiêu VND?"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "currency_convert",
+            "args": {
+              "from_currency": "USD",
+              "to_currency": "VND",
+              "amount": 500
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Kế thừa mã đồng tiền USD/VND và cập nhật amount=500."
+      }
+    },
+    {
+      "id": "G08_multi_crypto_switch",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Xem giá Bitcoin hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Còn Ethereum thì bao nhiêu?"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "crypto_price",
+            "args": {
+              "symbol": "ethereum"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Chuyển đổi tên đồng tiền mã hóa từ bitcoin sang ethereum."
+      }
+    },
+    {
+      "id": "G09_multi_clarify_then_search",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Xem các tweet mới nhất giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Của Sam Altman nhé"
         }
       ],
       "failure_type": "missing_info",
       "expect": {
         "tool_calls": [
           {
-            "name": "clarify",
+            "name": "timeline",
             "args": {
-              "response_type": "text"
+              "screenname": "sama"
             }
           }
         ]
       },
       "metadata": {
-        "what_it_tests": "Có limit nhưng vẫn thiếu account/topic thì phải hỏi lại."
+        "what_it_tests": "Multi-turn: Lượt 1 thiếu handle -> Lượt 2 bổ sung Sam Altman và map sang handle sama."
       }
     },
     {
-      "id": "G34_M05_cancel_to_capability",
+      "id": "G10_multi_out_of_scope_reset",
       "phase": "B",
       "turns": [
         {
           "role": "user",
-          "content": "Tìm tin AI hôm nay."
+          "content": "Tìm tin AI hôm nay"
         },
         {
           "role": "user",
-          "content": "Thôi, không cần tìm nữa."
-        },
-        {
-          "role": "user",
-          "content": "Chỉ liệt kê những tool bạn có."
+          "content": "Viết giúp mình một đoạn mã C++ sắp xếp mảng."
         }
       ],
-      "failure_type": "unnecessary_tool",
+      "failure_type": "out_of_scope",
       "expect": {
         "no_tool": true
       },
       "metadata": {
-        "what_it_tests": "Intent hiện tại hủy research và chỉ hỏi capability nên không gọi tool."
+        "what_it_tests": "Multi-turn: Lượt 2 yêu cầu viết code C++ ngoài phạm vi -> KHÔNG gọi tool."
       }
     }
   ]
