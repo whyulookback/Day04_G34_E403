@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-07-29T11:52:20.548256",
+  "version": "v4",
+  "provider": "openrouter",
+  "prompt": "tôi muốn đổi usd sang vnd?",
+  "response": "Bạn muốn đổi bao nhiêu USD sang VND?",
+  "tool_events": [
+    {
+      "tool": "clarify",
+      "args": {
+        "question": "Bạn muốn đổi bao nhiêu USD sang VND?",
+        "response_type": "text"
+      },
+      "result": {
+        "tool": "ask_user",
+        "question": "Bạn muốn đổi bao nhiêu USD sang VND?",
+        "response_type": "text",
+        "options": [],
+        "awaiting_user": true
+      }
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "assistant_text": null,
+      "tool_calls": [
+        {
+          "name": "clarify",
+          "args": {
+            "question": "Bạn muốn đổi bao nhiêu USD sang VND?",
+            "response_type": "text"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn muốn đổi bao nhiêu USD sang VND?",
+            "response_type": "text"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn muốn đổi bao nhiêu USD sang VND?",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    }
+  ]
+}
