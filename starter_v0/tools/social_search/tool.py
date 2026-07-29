@@ -37,16 +37,46 @@ def _tweet_item(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _tweets_from(data: dict[str, Any], limit: int) -> list[dict[str, Any]]:
-    raw_items = data.get("timeline") or data.get("tweets") or []
-    items = [_tweet_item(item) for item in raw_items if item.get("tweet_id") or item.get("id")]
+def _twitter241_search(query: str, search_type: str, limit: int) -> list[dict[str, Any]]:
+    type_map = {"Latest": "Latest", "Top": "Top"}
+    st = type_map.get(search_type, "Latest")
+    data = _twitter_get("/search", {"query": query, "type": st})
+    instructions = data.get("result", {}).get("timeline", {}).get("instructions", [])
+    items = []
+    for inst in instructions:
+        for entry in inst.get("entries", []):
+            tweet_results = entry.get("content", {}).get("itemContent", {}).get("tweet_results", {}).get("result", {})
+            legacy = tweet_results.get("legacy", {}) or tweet_results.get("tweet", {}).get("legacy", {})
+            text = (legacy.get("full_text") or "").strip()
+            tweet_id = legacy.get("id_str") or ""
+            user_results = tweet_results.get("core", {}).get("user_results", {}).get("result", {}).get("legacy", {})
+            handle = user_results.get("screen_name") or ""
+            if text and tweet_id:
+                items.append({
+                    "title": text.split("\n")[0][:120],
+                    "summary": text,
+                    "url": f"https://x.com/{handle}/status/{tweet_id}" if handle else f"https://x.com/i/status/{tweet_id}",
+                    "source": f"@{handle}" if handle else "x.com",
+                    "date": legacy.get("created_at"),
+                    "metrics": {
+                        "favorites": legacy.get("favorite_count"),
+                        "retweets": legacy.get("retweet_count"),
+                        "views": legacy.get("reply_count"),
+                    },
+                })
     return items[: int(limit or 5)]
 
 
 def search_tweets(query: str = "", search_type: str = "Latest", limit: int = 5) -> dict[str, Any]:
     try:
-        data = _twitter_get("/search.php", {"query": query, "search_type": search_type})
-        return {"tool": "search_tweets", "query": query, "search_type": search_type, "items": _tweets_from(data, limit)}
+        host = os.getenv("RAPIDAPI_TWITTER_HOST", "twitter-api45.p.rapidapi.com")
+        if "twitter241" in host:
+            items = _twitter241_search(query, search_type, limit)
+        else:
+            data = _twitter_get("/search.php", {"query": query, "search_type": search_type})
+            items = _tweets_from(data, limit)
+        return {"tool": "search_tweets", "query": query, "search_type": search_type, "items": items}
     except Exception as exc:
         return err("search_tweets", exc)
+
 

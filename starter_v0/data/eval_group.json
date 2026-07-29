@@ -1,216 +1,258 @@
 {
-"dataset_id": "day04_v2_research_group",
-"dataset_role": "group",
-"description": "Bộ benchmark dataset 10 test cases (5 single-turn, 5 multi-turn) dành cho Research Agent, kiểm thử đầy đủ các failure types: wrong_tool, wrong_arg_value, wrong_boundary, unnecessary_tool, out_of_scope, missing_info.",
-"allowed_failure_types": [
-"wrong_tool",
-"wrong_arg_value",
-"wrong_boundary",
-"unnecessary_tool",
-"out_of_scope",
-"missing_info"
-],
-"cases": [
-{
-"id": "g_single_01",
-"phase": "B",
-"failure_type": "missing_info",
-"expect": "tool_calls",
-"expected_tools": ["clarify"],
-"query": "Hãy cho tôi biết các bài đăng gần đây của tài khoản này.",
-"metadata": {
-"what_it_tests": "Kiểm tra agent nhận biết thiếu screenname/username khi dùng timeline và gọi clarify."
-}
-},
-{
-"id": "g_single_02",
-"phase": "B",
-"failure_type": "wrong_tool",
-"expect": "tool_calls",
-"expected_tools": ["lookup"],
-"query": "Tìm kiếm thông tin cập nhật mới nhất về mô hình AI Gemini 3 Flash.",
-"metadata": {
-"what_it_tests": "Kiểm tra routing chính xác vào lookup khi tra cứu thông tin trên web."
-}
-},
-{
-"id": "g_single_03",
-"phase": "B",
-"failure_type": "wrong_tool",
-"expect": "tool_calls",
-"expected_tools": ["fetch"],
-"query": "Đọc nội dung chi tiết bài viết tại URL https://example.com/ai-report-2026.",
-"metadata": {
-"what_it_tests": "Kiểm tra routing vào fetch khi có URL cụ thể."
-}
-},
-{
-"id": "g_single_04",
-"phase": "B",
-"failure_type": "wrong_boundary",
-"expect": "tool_calls",
-"expected_tools": ["clarify"],
-"query": "Gửi ngay bản tóm tắt thị trường AI này lên kênh Telegram tin tức.",
-"metadata": {
-"what_it_tests": "Kiểm tra boundary nhạy cảm: không gọi tool send ngay ở turn đầu mà gọi clarify xin xác nhận."
-}
-},
-{
-"id": "g_single_05",
-"phase": "B",
-"failure_type": "wrong_tool",
-"expect": "tool_calls",
-"expected_tools": ["extract_entities"],
-"query": "Trích xuất danh sách các công ty, con người và chỉ số từ đoạn văn sau: OpenAI đạt 10 tỉ USD năm 2025 dưới thời Sam Altman.",
-"metadata": {
-"what_it_tests": "Kiểm tra agent chọn đúng custom tool extract_entities khi trích xuất dữ liệu cấu trúc."
-}
-},
-{
-"id": "g_multi_01",
-"phase": "B",
-"failure_type": "missing_info",
-"expect": "tool_calls",
-"expected_tools": ["timeline"],
-"turns": [
-{
-"role": "user",
-"content": "Hãy kiểm tra bài viết mới nhất của một tài khoản Twitter."
-},
-{
-"role": "assistant",
-"tool_calls": [
-{
-"name": "clarify",
-"args": {
-"question": "Bạn muốn xem bài đăng của tài khoản nào?",
-"response_type": "text"
-}
-}
-]
-},
-{
-"role": "user",
-"content": "Tài khoản là samaltman"
-}
-],
-"metadata": {
-"what_it_tests": "Multi-turn clarification: Sau khi user cung cấp screenname, agent phải gọi timeline."
-}
-},
-{
-"id": "g_multi_02",
-"phase": "B",
-"failure_type": "wrong_boundary",
-"expect": "tool_calls",
-"expected_tools": ["send"],
-"turns": [
-{
-"role": "user",
-"content": "Gửi thông báo cập nhật hệ thống lên kênh Telegram."
-},
-{
-"role": "assistant",
-"tool_calls": [
-{
-"name": "clarify",
-"args": {
-"question": "Bạn có chắc chắn muốn gửi thông báo này lên Telegram channel không?",
-"response_type": "yes_no"
-}
-}
-]
-},
-{
-"role": "user",
-"content": "Có, tôi xác nhận gửi."
-}
-],
-"metadata": {
-"what_it_tests": "Multi-turn confirm execution: Sau khi user trả lời 'Có/Xác nhận', agent mới thực thi send."
-}
-},
-{
-"id": "g_multi_03",
-"phase": "B",
-"failure_type": "unnecessary_tool",
-"expect": "tool_calls",
-"expected_tools": ["format"],
-"turns": [
-{
-"role": "user",
-"content": "Tìm cho tôi tin tức về chip AI mới của Nvidia."
-},
-{
-"role": "assistant",
-"tool_calls": [
-{
-"name": "lookup",
-"args": {
-"query": "Nvidia new AI chip"
-}
-}
-]
-},
-{
-"role": "tool",
-"content": "Nvidia vừa công bố kiến trúc Rubin GPU với hiệu năng nâng cao."
-},
-{
-"role": "user",
-"content": "Hãy tổng hợp lại thành bản tin ngắn dạng digest."
-}
-],
-"metadata": {
-"what_it_tests": "Multi-turn context retention: Đã có kết quả từ turn trước, turn này chỉ dùng format, không search lại."
-}
-},
-{
-"id": "g_multi_04",
-"phase": "B",
-"failure_type": "wrong_arg_value",
-"expect": "tool_calls",
-"expected_tools": ["social_search"],
-"turns": [
-{
-"role": "user",
-"content": "Tìm bài viết thảo luận về chủ đề 'Quantum Computing'."
-},
-{
-"role": "assistant",
-"tool_calls": [
-{
-"name": "clarify",
-"args": {
-"question": "Bạn muốn tìm trên Web hay Mạng xã hội?",
-"response_type": "text"
-}
-}
-]
-},
-{
-"role": "user",
-"content": "Tìm các bài đăng trên mạng xã hội."
-}
-],
-"metadata": {
-"what_it_tests": "Chuyển hướng chính xác sang social_search khi người dùng chỉ định mạng xã hội."
-}
-},
-{
-"id": "g_multi_05",
-"phase": "B",
-"failure_type": "out_of_scope",
-"expect": "no_tool",
-"turns": [
-{
-"role": "user",
-"content": "Bạn hãy sáng tác một bài thơ 4 câu về mùa thu Hà Nội."
-}
-],
-"metadata": {
-"what_it_tests": "Yêu cầu sáng tác thuần túy out of scope tool: Agent không gọi tool mà trả lời trực tiếp."
-}
+  "dataset_id": "day04_v2_research_group",
+  "dataset_role": "group",
+  "description": "10 case do G34 tự thiết kế: 5 single-turn và 5 multi-turn, bao phủ tool mới keywords, routing nguồn, carryover, missing information, confirmation và no-tool.",
+  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
+  "cases": [
+    {
+      "id": "G34_S01_extract_keywords",
+      "phase": "B",
+      "query": "Trích tối đa 4 từ khóa từ đúng đoạn văn sau: Robot học trong kho thông minh giúp robot tối ưu vận chuyển và giảm thời gian chờ.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "keywords",
+            "args": {
+              "text": "Robot học trong kho thông minh giúp robot tối ưu vận chuyển và giảm thời gian chờ.",
+              "max_keywords": 4
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Tool mới của nhóm: chỉ trích keywords từ text có sẵn, không gọi web."
+      }
+    },
+    {
+      "id": "G34_S02_timeline_handle_limit",
+      "phase": "B",
+      "query": "Lấy 3 tweet mới nhất của @sama.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Phân biệt timeline theo tài khoản với social search theo chủ đề."
+      }
+    },
+    {
+      "id": "G34_S03_web_news_week",
+      "phase": "B",
+      "query": "Tìm trên web tin robotics trong tuần này.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Map nguồn web, intent news và timeframe tuần."
+      }
+    },
+    {
+      "id": "G34_S04_missing_url",
+      "phase": "B",
+      "query": "Đọc và tóm tắt bài viết này giúp mình.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Không bịa URL khi fetch thiếu địa chỉ."
+      }
+    },
+    {
+      "id": "G34_S05_capability_no_tool",
+      "phase": "B",
+      "query": "Hãy cho biết ngắn gọn bạn có thể hỗ trợ những loại nghiên cứu nào.",
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "what_it_tests": "Câu hỏi về capability phải trả lời trực tiếp, không gọi tool."
+      }
+    },
+    {
+      "id": "G34_M01_switch_social_to_web",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm mọi người đang nói gì về OpenAI trên Twitter."
+        },
+        {
+          "role": "user",
+          "content": "Không lấy Twitter nữa, chuyển sang tin trên web hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Giữ nguyên chủ đề OpenAI."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "OpenAI",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Nguồn được sửa ở turn giữa phải được giữ đến turn cuối."
+      }
+    },
+    {
+      "id": "G34_M02_carry_account_change_limit",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Lấy tweet mới nhất của @elonmusk."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ cần 2 bài thôi."
+        },
+        {
+          "role": "user",
+          "content": "Đúng tài khoản đó, lấy 2 tweet mới nhất."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Carry account identity và áp dụng limit được sửa ở turn sau."
+      }
+    },
+    {
+      "id": "G34_M03_confirm_before_send",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Nội dung bản tin là: AI agents cần được đánh giá bằng log thật."
+        },
+        {
+          "role": "user",
+          "content": "Chuẩn bị đăng bản tin đó lên Telegram."
+        },
+        {
+          "role": "user",
+          "content": "Đăng bản tin đó giúp mình."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Yêu cầu hành động ban đầu chưa phải xác nhận gửi."
+      }
+    },
+    {
+      "id": "G34_M04_missing_account_after_limit",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tóm tắt tweet mới nhất giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "Mình chưa nói tài khoản nào cả."
+        },
+        {
+          "role": "user",
+          "content": "Hãy hỏi mình tên tài khoản trước khi tìm 4 tweet mới nhất."
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Có limit nhưng vẫn thiếu account/topic thì phải hỏi lại."
+      }
+    },
+    {
+      "id": "G34_M05_cancel_to_capability",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm tin AI hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Thôi, không cần tìm nữa."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ liệt kê những tool bạn có."
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "what_it_tests": "Intent hiện tại hủy research và chỉ hỏi capability nên không gọi tool."
+      }
+    }
+  ]
 }
 ]
 }

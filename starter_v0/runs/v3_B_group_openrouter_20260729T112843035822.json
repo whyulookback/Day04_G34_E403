@@ -1,0 +1,894 @@
+{
+  "run_id": "v3_B_group_openrouter_20260729T112843035822",
+  "version": "v3",
+  "artifact_version": "v3+p4a006df55ad6+tefff0eaff67b",
+  "prompt_hash": "4a006df55ad6d6bfde3b9b59a628aa86454d4687911b6d24e93b22ae7f599857",
+  "tools_hash": "efff0eaff67b57d268af68fec6d39a6935e9d70739167d8ced75b990756d3381",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "D:\\AIThucChienLab\\labs\\Day04_G34_E403\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\AIThucChienLab\\labs\\Day04_G34_E403\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_group.json",
+  "dataset_id": "day04_v2_research_group",
+  "dataset_role": "group",
+  "description": "Team eval suite cho Agent v3 (10 cases: 5 single-turn và 5 multi-turn) bao gồm test cho tool mới hn_search, routing, boundary confirmation và multi-turn.",
+  "generated_at": "2026-07-29T11:28:43",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 8,
+    "case_accuracy": 0.8,
+    "tool_routing_accuracy": 0.8,
+    "argument_accuracy": 0.8,
+    "multiturn_accuracy": 0.8,
+    "failure_counts": {
+      "missing_info": 1,
+      "wrong_boundary": 1
+    },
+    "observed_mismatch_counts": {
+      "missing_tool_call": 2
+    }
+  },
+  "results": [
+    {
+      "id": "G01_hn_search_routing",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_hn_search",
+        "difficulty": "easy",
+        "what_it_tests": "Tìm bài thảo luận trên HackerNews -> gọi hn_search với query='LLM'."
+      },
+      "input": "Cộng đồng HackerNews đang thảo luận gì về LLM?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "LLM"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "LLM",
+              "limit": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "hn_search",
+          "args": {
+            "query": "LLM",
+            "limit": 5
+          },
+          "result": {
+            "tool": "hn_search",
+            "query": "LLM",
+            "items": [
+              {
+                "title": "LLM Inevitabilism",
+                "summary": "Points: 1773 | Comments: 1628 | By: SwoopsFromAbove",
+                "url": "https://tomrenner.com/posts/llm-inevitabilism/",
+                "source": "HackerNews",
+                "date": "2025-07-15T04:35:35Z",
+                "metrics": {
+                  "points": 1773,
+                  "comments": 1628
+                }
+              },
+              {
+                "title": "Learning to Reason with LLMs",
+                "summary": "Points: 1654 | Comments: 1261 | By: fofoz",
+                "url": "https://openai.com/index/learning-to-reason-with-llms/",
+                "source": "HackerNews",
+                "date": "2024-09-12T17:08:46Z",
+                "metrics": {
+                  "points": 1654,
+                  "comments": 1261
+                }
+              },
+              {
+                "title": "LLM Visualization",
+                "summary": "Points: 1592 | Comments: 131 | By: plibither8",
+                "url": "https://bbycroft.net/llm",
+                "source": "HackerNews",
+                "date": "2023-12-03T06:08:29Z",
+                "metrics": {
+                  "points": 1592,
+                  "comments": 131
+                }
+              },
+              {
+                "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via RL",
+                "summary": "Points: 1351 | Comments: 1056 | By: gradus_ad",
+                "url": "https://arxiv.org/abs/2501.12948",
+                "source": "HackerNews",
+                "date": "2025-01-25T18:39:49Z",
+                "metrics": {
+                  "points": 1351,
+                  "comments": 1056
+                }
+              },
+              {
+                "title": "A small number of samples can poison LLMs of any size",
+                "summary": "Points: 1202 | Comments: 439 | By: meetpateltech",
+                "url": "https://www.anthropic.com/research/small-samples-poison",
+                "source": "HackerNews",
+                "date": "2025-10-09T16:04:04Z",
+                "metrics": {
+                  "points": 1202,
+                  "comments": 439
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_hn_search_limit_arg",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_limit_hn",
+        "difficulty": "easy",
+        "what_it_tests": "Trích đúng limit=3 từ '3 thảo luận'."
+      },
+      "input": "Tìm 3 thảo luận hot nhất về Rust trên HackerNews",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "Rust",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "Rust",
+              "limit": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "hn_search",
+          "args": {
+            "query": "Rust",
+            "limit": 3
+          },
+          "result": {
+            "tool": "hn_search",
+            "query": "Rust",
+            "items": [
+              {
+                "title": "Why Discord is switching from Go to Rust",
+                "summary": "Points: 1582 | Comments: 642 | By: Sikul",
+                "url": "https://blog.discordapp.com/why-discord-is-switching-from-go-to-rust-a190bbca2b1f",
+                "source": "HackerNews",
+                "date": "2020-02-04T17:30:40Z",
+                "metrics": {
+                  "points": 1582,
+                  "comments": 642
+                }
+              },
+              {
+                "title": "Leaving Rust gamedev after 3 years",
+                "summary": "Points: 1484 | Comments: 972 | By: darthdeus",
+                "url": "https://loglog.games/blog/leaving-rust-gamedev/",
+                "source": "HackerNews",
+                "date": "2024-04-26T17:33:56Z",
+                "metrics": {
+                  "points": 1484,
+                  "comments": 972
+                }
+              },
+              {
+                "title": "A half-hour to learn Rust",
+                "summary": "Points: 1444 | Comments: 330 | By: selvan",
+                "url": "https://fasterthanli.me/articles/a-half-hour-to-learn-rust",
+                "source": "HackerNews",
+                "date": "2021-01-02T05:50:39Z",
+                "metrics": {
+                  "points": 1444,
+                  "comments": 330
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_missing_hn_query",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "missing_hn_query",
+        "difficulty": "medium",
+        "what_it_tests": "Thiếu từ khóa cần tìm trên HackerNews -> gọi clarify hỏi lại."
+      },
+      "input": "Tìm kiếm bài đăng mới nhất trên HackerNews",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "",
+              "limit": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "missing_info",
+        "failures": [
+          "missing tool call clarify",
+          "extra tool call hn_search"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "hn_search",
+          "args": {
+            "query": "",
+            "limit": 5
+          },
+          "result": {
+            "tool": "hn_search",
+            "error": "str",
+            "message": "Missing required argument 'query'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_out_of_scope_email",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "out_of_scope_scripting",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu viết code script -> out of scope, không gọi tool nào."
+      },
+      "input": "Viết giúp tôi script Python đếm từ trong file text",
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Dưới đây là một đoạn script Python đơn giản để đếm số từ trong một file text:\n\n```python\ndef count_words_in_file(file_path):\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            text = file.read()\n            words = text.split()\n            word_count = len(words)\n            return word_count\n    except FileNotFoundError:\n        return \"File không tồn tại.\"\n    except Exception as e:\n        return f\"Có lỗi xảy ra: {e}\"\n\n# Thay đổi đường dẫn file ở đây\nfile_path = 'duong_dan_toi_file.txt'\nprint(f\"Số từ trong file: {count_words_in_file(file_path)}\")\n```\n\nBạn chỉ cần thay đổi `duong_dan_toi_file.txt` thành đường dẫn đến file text mà bạn muốn đếm từ. Chúc bạn thành công!",
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G05_confirm_before_send_telegram",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "confirm_before_send",
+        "difficulty": "medium",
+        "what_it_tests": "Hành động send có side effect -> gọi clarify để xin xác nhận trước khi thực hiện."
+      },
+      "input": "Gửi thông báo 'Đã xong báo cáo' qua Telegram giúp tôi",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có chắc chắn muốn gửi thông báo 'Đã xong báo cáo' qua Telegram không?",
+              "response_type": "yes_no"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có chắc chắn muốn gửi thông báo 'Đã xong báo cáo' qua Telegram không?",
+            "response_type": "yes_no"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có chắc chắn muốn gửi thông báo 'Đã xong báo cáo' qua Telegram không?",
+            "response_type": "yes_no",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G06_multiturn_hn_search_fill",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_hn_fill",
+        "difficulty": "hard",
+        "what_it_tests": "3 lượt: lượt 1 thiếu query -> lượt 2 bổ sung DeepSeek -> lượt 3 gọi hn_search với limit=5."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm bài viết trên HackerNews giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Tìm về DeepSeek nhé"
+        },
+        {
+          "role": "user",
+          "content": "Lấy 5 bài mới nhất thôi"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "DeepSeek",
+              "limit": 5
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "DeepSeek",
+              "limit": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "hn_search",
+          "args": {
+            "query": "DeepSeek",
+            "limit": 5
+          },
+          "result": {
+            "tool": "hn_search",
+            "query": "DeepSeek",
+            "items": [
+              {
+                "title": "DeepSeek v4",
+                "summary": "Points: 2091 | Comments: 1607 | By: impact_sy",
+                "url": "https://api-docs.deepseek.com/news/news260424",
+                "source": "HackerNews",
+                "date": "2026-04-24T03:01:21Z",
+                "metrics": {
+                  "points": 2091,
+                  "comments": 1607
+                }
+              },
+              {
+                "title": "DeepSeek-R1",
+                "summary": "Points: 1843 | Comments: 663 | By: meetpateltech",
+                "url": "https://github.com/deepseek-ai/DeepSeek-R1",
+                "source": "HackerNews",
+                "date": "2025-01-20T12:37:58Z",
+                "metrics": {
+                  "points": 1843,
+                  "comments": 663
+                }
+              },
+              {
+                "title": "OpenAI Furious DeepSeek Might Have Stolen All the Data OpenAI Stole from Us",
+                "summary": "Points: 1361 | Comments: 16 | By: latexr",
+                "url": "https://www.404media.co/openai-furious-deepseek-might-have-stolen-all-the-data-openai-stole-from-us/",
+                "source": "HackerNews",
+                "date": "2025-01-29T14:52:34Z",
+                "metrics": {
+                  "points": 1361,
+                  "comments": 16
+                }
+              },
+              {
+                "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via RL",
+                "summary": "Points: 1351 | Comments: 1056 | By: gradus_ad",
+                "url": "https://arxiv.org/abs/2501.12948",
+                "source": "HackerNews",
+                "date": "2025-01-25T18:39:49Z",
+                "metrics": {
+                  "points": 1351,
+                  "comments": 1056
+                }
+              },
+              {
+                "title": "DeepSeek OCR",
+                "summary": "Points: 1003 | Comments: 244 | By: pierre",
+                "url": "https://github.com/deepseek-ai/DeepSeek-OCR",
+                "source": "HackerNews",
+                "date": "2025-10-20T06:26:33Z",
+                "metrics": {
+                  "points": 1003,
+                  "comments": 244
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_multiturn_switch_to_hn",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_switch_to_hn",
+        "difficulty": "hard",
+        "what_it_tests": "Chuyển hướng từ web_search sang hn_search ở lượt 2."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm tin tức web về Python"
+        },
+        {
+          "role": "user",
+          "content": "À thôi, chuyển sang tìm thảo luận Python trên HackerNews"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "Python"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "Python",
+              "limit": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "hn_search",
+          "args": {
+            "query": "Python",
+            "limit": 5
+          },
+          "result": {
+            "tool": "hn_search",
+            "query": "Python",
+            "items": [
+              {
+                "title": "Uv is the best thing to happen to the Python ecosystem in a decade",
+                "summary": "Points: 2214 | Comments: 1324 | By: todsacerdoti",
+                "url": "https://emily.space/posts/251023-uv",
+                "source": "HackerNews",
+                "date": "2025-10-29T18:57:29Z",
+                "metrics": {
+                  "points": 2214,
+                  "comments": 1324
+                }
+              },
+              {
+                "title": "Sunsetting Python 2",
+                "summary": "Points: 1616 | Comments: 704 | By: azizsaya",
+                "url": "https://www.python.org/doc/sunset-python-2/",
+                "source": "HackerNews",
+                "date": "2019-09-09T06:43:24Z",
+                "metrics": {
+                  "points": 1616,
+                  "comments": 704
+                }
+              },
+              {
+                "title": "Grumpy: Go running Python",
+                "summary": "Points: 1411 | Comments: 451 | By: trotterdylan",
+                "url": "https://opensource.googleblog.com/2017/01/grumpy-go-running-python.html",
+                "source": "HackerNews",
+                "date": "2017-01-04T17:00:39Z",
+                "metrics": {
+                  "points": 1411,
+                  "comments": 451
+                }
+              },
+              {
+                "title": "A from-scratch tour of Bitcoin in Python",
+                "summary": "Points: 1208 | Comments: 277 | By: yigitdemirag",
+                "url": "https://karpathy.github.io/2021/06/21/blockchain/",
+                "source": "HackerNews",
+                "date": "2021-06-22T16:30:43Z",
+                "metrics": {
+                  "points": 1208,
+                  "comments": 277
+                }
+              },
+              {
+                "title": "Python 3.13 Gets a JIT",
+                "summary": "Points: 1081 | Comments: 521 | By: todsacerdoti",
+                "url": "https://tonybaloney.github.io/posts/python-gets-a-jit.html",
+                "source": "HackerNews",
+                "date": "2024-01-09T08:35:58Z",
+                "metrics": {
+                  "points": 1081,
+                  "comments": 521
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G08_multiturn_correction_query",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_correction_query",
+        "difficulty": "medium",
+        "what_it_tests": "Sửa từ khóa từ React thành Vue.js ở lượt 2."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm bài viết trên HackerNews về React"
+        },
+        {
+          "role": "user",
+          "content": "Sửa lại thành Vue.js giúp mình"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "Vue.js"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "hn_search",
+            "args": {
+              "query": "Vue.js",
+              "limit": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "hn_search",
+          "args": {
+            "query": "Vue.js",
+            "limit": 5
+          },
+          "result": {
+            "tool": "hn_search",
+            "query": "Vue.js",
+            "items": [
+              {
+                "title": "Vue.js 3",
+                "summary": "Points: 768 | Comments: 305 | By: simulo",
+                "url": "https://github.com/vuejs/vue-next/releases/tag/v3.0.0",
+                "source": "HackerNews",
+                "date": "2020-09-18T15:50:42Z",
+                "metrics": {
+                  "points": 768,
+                  "comments": 305
+                }
+              },
+              {
+                "title": "Vue.js vs. React",
+                "summary": "Points: 732 | Comments: 471 | By: fanf2",
+                "url": "https://vuejs.org/v2/guide/comparison.html#React",
+                "source": "HackerNews",
+                "date": "2017-08-19T10:43:04Z",
+                "metrics": {
+                  "points": 732,
+                  "comments": 471
+                }
+              },
+              {
+                "title": "Why we chose Vue.js",
+                "summary": "Points: 637 | Comments: 271 | By: rmason",
+                "url": "https://about.gitlab.com/2016/10/20/why-we-chose-vue/",
+                "source": "HackerNews",
+                "date": "2016-10-21T03:21:07Z",
+                "metrics": {
+                  "points": 637,
+                  "comments": 271
+                }
+              },
+              {
+                "title": "Vue.js: the good, the meh, and the ugly",
+                "summary": "Points: 621 | Comments: 374 | By: lxm",
+                "url": "https://medium.com/@Pier/vue-js-the-good-the-meh-and-the-ugly-82800bbe6684",
+                "source": "HackerNews",
+                "date": "2018-07-05T20:12:50Z",
+                "metrics": {
+                  "points": 621,
+                  "comments": 374
+                }
+              },
+              {
+                "title": "Show HN: Material Dashboard – Free Admin for Bootstrap 4, React, Angular, Vue.js",
+                "summary": "Points: 436 | Comments: 150 | By: axelut",
+                "url": "https://github.com/creativetimofficial/material-dashboard",
+                "source": "HackerNews",
+                "date": "2018-06-22T12:38:34Z",
+                "metrics": {
+                  "points": 436,
+                  "comments": 150
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G09_multiturn_clarify_url_then_fetch",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_clarify_url",
+        "difficulty": "medium",
+        "what_it_tests": "Lượt 1 thiếu URL -> lượt 2 cung cấp URL -> gọi fetch."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Đọc bài báo này giúp tôi"
+        },
+        {
+          "role": "user",
+          "content": "https://news.ycombinator.com/item?id=12345"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://news.ycombinator.com/item?id=12345"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://news.ycombinator.com/item?id=12345"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "fetch",
+          "args": {
+            "url": "https://news.ycombinator.com/item?id=12345"
+          },
+          "result": {
+            "tool": "read_url",
+            "url": "https://news.ycombinator.com/item?id=12345",
+            "items": [
+              {
+                "title": "Distributed file storage: MogileFS | Hacker News",
+                "url": "https://news.ycombinator.com/item?id=12345",
+                "source": "news.ycombinator.com",
+                "summary": "|     |     |     |\n| --- | --- | --- |\n| |     |     |     |\n| --- | --- | --- |\n| [![](https://news.ycombinator.com/y18.svg)](https://news.ycombinator.com/) | **[Hacker News](https://news.ycombinator.com/news)** [new](https://news.ycombinator.com/newest) \\| [past](https://news.ycombinator.com/front) \\| [comments](https://news.ycombinator.com/newcomments) \\| [ask](https://news.ycombinator.com/ask) \\| [show](https://news.ycombinator.com/show) \\| [jobs](https://news.ycombinator.com/jobs) \\| [submit](https://news.ycombinator.com/submit) | [login](https://news.ycombinator.com/login?goto=item%3Fid%3D12345) | |\n\n| |     |     |     |\n| --- | --- | --- |\n|  |  | [Distributed file storage: MogileFS](http://www.uncov.com/2007/4/4/distributed-file-storage-with-mogilefs) ( [uncov.com](https://news.ycombinator.com/from?site=uncov.com)) |\n|  | 6 points by [bootload](https://news.ycombinator.com/user?id=bootload) [on April 12, 2007](https://news.ycombinator.com/item?id=12345) \\| [hide](https://news.ycombinator.com/hide?id=12345&goto=item%3Fid%3D12345) \\| [past](https://hn.algolia.com/?query=Distributed%20file%20storage%3A%20MogileFS&type=story&dateRange=all&sort=byDate&storyText=false&prefix&page=0) \\| [favorite](https://news.ycombinator.com/fave?id=12345&auth=2d1819a07fd805795190d3453a4a9855b95a8bd7) \\| [6 comments](https://news.ycombinator.com/item?id=12345) |\n|  |  |\n\n|     |     |     |\n| --- | --- | --- |\n| |     |     |     |\n| --- | --- | --- |\n| ![](https://news.ycombinator.com/s.gif) |  | [staunch](https://news.ycombinator.com/user?id=staunch) [on April 13, 2007](https://news.ycombinator.com/item?id=12426) \\| [next](https://news.ycombinator.com/item?id=12345#12505)\\[–\\]<br>Another example of Brad Fitzpatrick showing what a hacker armed with Perl (and occasionally C) can do. He creates tools that obsolete expensive equipment in weekends.<br>Perlbal = Who needs a $200k \"intelligent\" hardware load balancer?<br>MogileFS = RAID my bank account? No thanks I'll use commodity disks on the cheap.<br>Memcached = A hundred DB servers? How about we just utilize the extra memory on the network and cache a lot, thanks. | |\n| |     |     |     |\n| --- | --- | --- |\n| ![](https://news.ycombinator.com/s.gif) |  | [bootload](https://news.ycombinator.com/user?id=bootload) [on April 13, 2007](https://news.ycombinator.com/item?id=12485) \\| [parent](https://news.ycombinator.com/item?id=12345#12426) \\| [next](https://news.ycombinator.com/item?id=12345#12505)\\[–\\]<br>Gotta agree. Best thing MT & 6Apart did hiring this guy. I can't help think that if some of these tools intelligently applied with twitter (or MySpace) they might be doing better than '11,000 s' ~ [http://news.ycombinator.com/comments?id=12441](http://news.ycombinator.com/comments?id=12441) <br>The reason I added this was I was looking for topics on scaling. Google (lots of reads), Livejournal (lots of writes & reads) must be doing something right in scaling to have a look at. One point Paul Buchheit \\[0\\] made in Startup School 2007 was the difference b/w types of data. Big data & small data. The later you should use DRAM for. Wonder if Twitter uses 'memcached'?<br>Reference<br>\\[0\\] Startup School 2007 Wiki, 'Paul Buchheit creator of GMAIL at YCombinator Startup School'<br>[http://wiki.startupschool.org/doku.php?id=notes](http://wiki.startupschool.org/doku.php?id=notes) | |\n| |     |     |     |\n| --- | --- | --- |\n| ![](https://news.ycombinator.com/s.gif) |  | [staunch](https://news.ycombinator.com/user?id=staunch) [on April 13, 2007](https://news.ycombinator.com/item?id=12492) \\| [root](https://news.ycombinator.com/item?id=12345#12426) \\| [parent](https://news.ycombinator.com/item?id=12345#12485) \\| [next](https://news.ycombinator.com/item?id=12345#12505)\\[–\\]<br>Six Apart didn't hire Brad -- they acquired LiveJournal from him and named him \"Chief Architect\" or something. He's an amazing hacker and a reluctantly-badass entrepreneur.<br>I'm sure Twitter will use memcached, like Facebook/D"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G10_multiturn_confirm_send",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_confirm_send",
+        "difficulty": "hard",
+        "what_it_tests": "Lượt 1 hỏi xin xác nhận -> lượt 2 user đồng ý -> gọi send với confirmed=True."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Gửi tin nhắn 'Báo cáo AI hoàn tất' qua Telegram"
+        },
+        {
+          "role": "user",
+          "content": "Tôi xác nhận đồng ý gửi nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "Báo cáo AI hoàn tất",
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có chắc chắn muốn gửi tin nhắn 'Báo cáo AI hoàn tất' qua Telegram không?",
+              "response_type": "yes_no"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "wrong_boundary",
+        "failures": [
+          "missing tool call send",
+          "extra tool call clarify"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có chắc chắn muốn gửi tin nhắn 'Báo cáo AI hoàn tất' qua Telegram không?",
+            "response_type": "yes_no"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có chắc chắn muốn gửi tin nhắn 'Báo cáo AI hoàn tất' qua Telegram không?",
+            "response_type": "yes_no",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    }
+  ]
+}
