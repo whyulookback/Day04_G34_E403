@@ -38,6 +38,7 @@ TOOL_FUNCTIONS = {
     "policy": search_company_policy,
     "papers": arxiv_search,
     "paper_text": get_arxiv_paper_text,
+    "hn_search": search_hackernews,
 }
 
 
