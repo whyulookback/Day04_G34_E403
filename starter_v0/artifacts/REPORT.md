@@ -70,9 +70,9 @@ Fill from `artifacts/version_log.csv` and `runs/*.json`.
 
 | Version | Prompt/tool change | Hypothesis | Metric name | Before | After | Run File |
 |---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
-| v1 |  |  |  |  |  |  |
-| v2 |  |  |  |  |  |  |
+| v0 | baseline | Baseline run to establish initial performance benchmark | case_accuracy | 0.0 | 0.65 | runs/v0_B_base_openrouter_20260729T101023034591.json |
+| v1 | system_prompt.md | Instruct prompt on clarify rules, confirm before send, and out-of-scope handling | tool_routing_accuracy | 0.70 | 0.90 | runs/v1_B_base_openrouter_20260729T102352970001.json |
+| v2 | tools.yaml| Require response_type in clarify schema and instruct explicit parameter conventions | case_accuracy | 0.65 | 0.95 | runs/v2_B_base_openrouter_20260729T102912146152.json |
 | v3 |  |  |  |  |  |  |
 
 ## B2. Failure analysis
@@ -81,7 +81,13 @@ Use actual failures from `results[*].result.failures`.
 
 | Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| R03_web_news_routing | wrong_arg_value | lookup | Redundant words in query ("AI news" instead of "AI") | Clarify in system prompt to keep search queries clean |
+| R08_out_of_scope | out_of_scope | send | Called tool on out of scope query | Instruct prompt to return no tool when query is out of scope |
+| R10_missing_handle | missing_info | timeline | Guessed handle instead of asking user | Instruct prompt to call `clarify` when handle is missing |
+| R11_missing_url | missing_info | fetch | Guessed URL instead of asking user | Instruct prompt to call `clarify` when URL is missing |
+| R12_confirm_before_send | wrong_boundary | send | Executed send without confirmation | Require `clarify` (yes_no) confirmation before send |
+| R13_parallel_web_and_tweets | wrong_tool | lookup, timeline | Used timeline instead of social_search for topic tweets | Instruct prompt to use `social_search` for topic search |
+| R14_out_of_scope_coding | out_of_scope | send | Called tool on out of scope coding question | Instruct prompt to refrain from calling tools for out of scope tasks |
 
 ## B3. Team eval cases
 
