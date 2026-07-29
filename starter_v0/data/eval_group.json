@@ -1,7 +1,216 @@
 {
-  "dataset_id": "day04_v2_research_group",
-  "dataset_role": "group",
-  "description": "Template để NHÓM tự viết đúng 10 case: 5 single-turn dùng query và 5 multi-turn dùng turns. Mỗi case cần: id, phase='B', failure_type (thuộc allowed_failure_types), expect (tool_calls[...] hoặc no_tool=true), và metadata.what_it_tests. File để trống có chủ đích vì mỗi nhóm phải tự thiết kế các case này.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+"dataset_id": "day04_v2_research_group",
+"dataset_role": "group",
+"description": "Bộ benchmark dataset 10 test cases (5 single-turn, 5 multi-turn) dành cho Research Agent, kiểm thử đầy đủ các failure types: wrong_tool, wrong_arg_value, wrong_boundary, unnecessary_tool, out_of_scope, missing_info.",
+"allowed_failure_types": [
+"wrong_tool",
+"wrong_arg_value",
+"wrong_boundary",
+"unnecessary_tool",
+"out_of_scope",
+"missing_info"
+],
+"cases": [
+{
+"id": "g_single_01",
+"phase": "B",
+"failure_type": "missing_info",
+"expect": "tool_calls",
+"expected_tools": ["clarify"],
+"query": "Hãy cho tôi biết các bài đăng gần đây của tài khoản này.",
+"metadata": {
+"what_it_tests": "Kiểm tra agent nhận biết thiếu screenname/username khi dùng timeline và gọi clarify."
+}
+},
+{
+"id": "g_single_02",
+"phase": "B",
+"failure_type": "wrong_tool",
+"expect": "tool_calls",
+"expected_tools": ["lookup"],
+"query": "Tìm kiếm thông tin cập nhật mới nhất về mô hình AI Gemini 3 Flash.",
+"metadata": {
+"what_it_tests": "Kiểm tra routing chính xác vào lookup khi tra cứu thông tin trên web."
+}
+},
+{
+"id": "g_single_03",
+"phase": "B",
+"failure_type": "wrong_tool",
+"expect": "tool_calls",
+"expected_tools": ["fetch"],
+"query": "Đọc nội dung chi tiết bài viết tại URL https://example.com/ai-report-2026.",
+"metadata": {
+"what_it_tests": "Kiểm tra routing vào fetch khi có URL cụ thể."
+}
+},
+{
+"id": "g_single_04",
+"phase": "B",
+"failure_type": "wrong_boundary",
+"expect": "tool_calls",
+"expected_tools": ["clarify"],
+"query": "Gửi ngay bản tóm tắt thị trường AI này lên kênh Telegram tin tức.",
+"metadata": {
+"what_it_tests": "Kiểm tra boundary nhạy cảm: không gọi tool send ngay ở turn đầu mà gọi clarify xin xác nhận."
+}
+},
+{
+"id": "g_single_05",
+"phase": "B",
+"failure_type": "wrong_tool",
+"expect": "tool_calls",
+"expected_tools": ["extract_entities"],
+"query": "Trích xuất danh sách các công ty, con người và chỉ số từ đoạn văn sau: OpenAI đạt 10 tỉ USD năm 2025 dưới thời Sam Altman.",
+"metadata": {
+"what_it_tests": "Kiểm tra agent chọn đúng custom tool extract_entities khi trích xuất dữ liệu cấu trúc."
+}
+},
+{
+"id": "g_multi_01",
+"phase": "B",
+"failure_type": "missing_info",
+"expect": "tool_calls",
+"expected_tools": ["timeline"],
+"turns": [
+{
+"role": "user",
+"content": "Hãy kiểm tra bài viết mới nhất của một tài khoản Twitter."
+},
+{
+"role": "assistant",
+"tool_calls": [
+{
+"name": "clarify",
+"args": {
+"question": "Bạn muốn xem bài đăng của tài khoản nào?",
+"response_type": "text"
+}
+}
+]
+},
+{
+"role": "user",
+"content": "Tài khoản là samaltman"
+}
+],
+"metadata": {
+"what_it_tests": "Multi-turn clarification: Sau khi user cung cấp screenname, agent phải gọi timeline."
+}
+},
+{
+"id": "g_multi_02",
+"phase": "B",
+"failure_type": "wrong_boundary",
+"expect": "tool_calls",
+"expected_tools": ["send"],
+"turns": [
+{
+"role": "user",
+"content": "Gửi thông báo cập nhật hệ thống lên kênh Telegram."
+},
+{
+"role": "assistant",
+"tool_calls": [
+{
+"name": "clarify",
+"args": {
+"question": "Bạn có chắc chắn muốn gửi thông báo này lên Telegram channel không?",
+"response_type": "yes_no"
+}
+}
+]
+},
+{
+"role": "user",
+"content": "Có, tôi xác nhận gửi."
+}
+],
+"metadata": {
+"what_it_tests": "Multi-turn confirm execution: Sau khi user trả lời 'Có/Xác nhận', agent mới thực thi send."
+}
+},
+{
+"id": "g_multi_03",
+"phase": "B",
+"failure_type": "unnecessary_tool",
+"expect": "tool_calls",
+"expected_tools": ["format"],
+"turns": [
+{
+"role": "user",
+"content": "Tìm cho tôi tin tức về chip AI mới của Nvidia."
+},
+{
+"role": "assistant",
+"tool_calls": [
+{
+"name": "lookup",
+"args": {
+"query": "Nvidia new AI chip"
+}
+}
+]
+},
+{
+"role": "tool",
+"content": "Nvidia vừa công bố kiến trúc Rubin GPU với hiệu năng nâng cao."
+},
+{
+"role": "user",
+"content": "Hãy tổng hợp lại thành bản tin ngắn dạng digest."
+}
+],
+"metadata": {
+"what_it_tests": "Multi-turn context retention: Đã có kết quả từ turn trước, turn này chỉ dùng format, không search lại."
+}
+},
+{
+"id": "g_multi_04",
+"phase": "B",
+"failure_type": "wrong_arg_value",
+"expect": "tool_calls",
+"expected_tools": ["social_search"],
+"turns": [
+{
+"role": "user",
+"content": "Tìm bài viết thảo luận về chủ đề 'Quantum Computing'."
+},
+{
+"role": "assistant",
+"tool_calls": [
+{
+"name": "clarify",
+"args": {
+"question": "Bạn muốn tìm trên Web hay Mạng xã hội?",
+"response_type": "text"
+}
+}
+]
+},
+{
+"role": "user",
+"content": "Tìm các bài đăng trên mạng xã hội."
+}
+],
+"metadata": {
+"what_it_tests": "Chuyển hướng chính xác sang social_search khi người dùng chỉ định mạng xã hội."
+}
+},
+{
+"id": "g_multi_05",
+"phase": "B",
+"failure_type": "out_of_scope",
+"expect": "no_tool",
+"turns": [
+{
+"role": "user",
+"content": "Bạn hãy sáng tác một bài thơ 4 câu về mùa thu Hà Nội."
+}
+],
+"metadata": {
+"what_it_tests": "Yêu cầu sáng tác thuần túy out of scope tool: Agent không gọi tool mà trả lời trực tiếp."
+}
+}
+]
 }
